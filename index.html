@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAP v06</title>
+    <title>MAP v07 - Full Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -25,7 +25,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Lock Screen Styles */
+        /* Mascara / Lock Screen */
         #lock-screen {
             position: fixed;
             inset: 0;
@@ -131,7 +131,7 @@
             border: none;
             color: #fff;
             width: 100%;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
             outline: none;
         }
@@ -139,7 +139,7 @@
         .badge-circle {
             width: 60px;
             height: 60px;
-            border-radius: 24px;
+            border-radius: 20px;
             background: #0d0d0e;
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
@@ -153,7 +153,8 @@
         }
         .badge-circle.active {
             opacity: 1;
-            border-color: rgba(244, 63, 94, 0.3);
+            border-color: rgba(244, 63, 94, 0.4);
+            background: rgba(244, 63, 94, 0.05);
         }
         .badge-circle i { width: 18px; height: 18px; }
         .badge-circle span { font-size: 8px; font-weight: 900; text-transform: uppercase; }
@@ -180,7 +181,7 @@
             </div>
             <div class="space-y-4">
                 <input type="password" id="pass-trigger" placeholder="Type command..." class="lock-input italic uppercase" onkeypress="handleLockPress(event)">
-                <button onclick="checkLock()" class="block mx-auto text-[9px] font-black text-zinc-600 uppercase tracking-widest hover:text-rose-500 transition-colors">Acessar Ranking</button>
+                <button onclick="checkLock()" class="block mx-auto text-[9px] font-black text-zinc-600 uppercase tracking-widest hover:text-rose-500 transition-colors italic">Acessar Ranking</button>
             </div>
         </div>
     </div>
@@ -188,10 +189,10 @@
     <div id="real-app" class="min-h-screen pb-40">
         <header class="p-6 flex justify-between items-center max-w-lg mx-auto">
             <div class="flex items-center gap-3">
-                <span class="text-2xl font-black tracking-tighter">MAP<span class="text-rose-500">.</span></span>
+                <span class="text-2xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
                 <div class="bg-zinc-900/50 px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5">
                     <div id="cloud-status" class="w-1.5 h-1.5 rounded-full bg-zinc-700"></div>
-                    <span class="text-[12px] font-black text-yellow-500" id="global-score">0.00</span>
+                    <span class="text-[12px] font-black text-yellow-500 italic" id="global-score">0.00</span>
                 </div>
             </div>
             
@@ -201,6 +202,7 @@
         </header>
 
         <main class="max-w-lg mx-auto px-6 space-y-6">
+            <!-- ABA HOME -->
             <div id="tab-home" class="tab-content active space-y-6">
                 <section class="glass-card p-6 border border-white/5">
                     <div class="flex items-center justify-between mb-4">
@@ -227,11 +229,13 @@
                 <div id="recent-list" class="space-y-4"></div>
             </div>
 
+            <!-- ABA BUSCA -->
             <div id="tab-search" class="tab-content space-y-6">
                 <input type="text" id="search-input" oninput="render()" placeholder="Procurar matches..." class="w-full bg-zinc-900/50 border border-white/5 rounded-2xl px-6 py-4 outline-none font-bold italic">
                 <div id="search-results" class="space-y-4"></div>
             </div>
 
+            <!-- ABA MÉTRICAS -->
             <div id="tab-stats" class="tab-content space-y-6">
                 <h2 class="text-xl font-black italic tracking-tighter">Métricas & Performance</h2>
                 <div id="conversion-funnel" class="glass-card p-6 flex flex-col gap-2"></div>
@@ -246,11 +250,13 @@
                 </div>
             </div>
 
+            <!-- ABA FAVORITOS -->
             <div id="tab-bookmarks" class="tab-content space-y-6">
                 <h2 class="text-xl font-black italic tracking-tighter text-rose-500">Destaques</h2>
                 <div id="bookmarks-list" class="space-y-4"></div>
             </div>
 
+            <!-- ABA PERFIL -->
             <div id="tab-profile" class="tab-content space-y-6">
                 <div class="glass-card p-6 space-y-6 text-center">
                     <div class="flex flex-col items-center gap-3">
@@ -280,9 +286,9 @@
         </nav>
     </div>
 
-    <!-- Modal Dossiê -->
+    <!-- Modal Dossiê Full -->
     <div id="match-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center p-4 z-[110]">
-        <div class="glass-card w-full max-w-lg p-8 space-y-8 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
+        <div class="glass-card w-full max-w-lg p-8 space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
             <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-zinc-900 rounded-full text-zinc-500"><i data-lucide="x" class="w-5 h-5"></i></button>
             
             <div class="flex flex-col items-center gap-4">
@@ -303,17 +309,45 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-card p-5 bg-zinc-900/30">
-                    <p class="text-[9px] font-black text-zinc-600 uppercase mb-3 tracking-widest italic">Carreira</p>
-                    <textarea id="edit-profession" oninput="updateModalState()" class="editable-field h-16 bg-transparent resize-none leading-tight italic" placeholder="Cargo/Profissão..."></textarea>
+            <!-- Dados Complementares -->
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-card p-4 bg-zinc-900/30">
+                        <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest italic">Carreira</p>
+                        <input type="text" id="edit-profession" oninput="updateModalState()" class="editable-field italic" placeholder="Cargo/Profissão...">
+                    </div>
+                    <div class="glass-card p-4 bg-zinc-900/30">
+                        <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest italic">Formação</p>
+                        <input type="text" id="edit-formation" oninput="updateModalState()" class="editable-field italic" placeholder="Educação...">
+                    </div>
                 </div>
-                <div class="glass-card p-5 bg-zinc-900/30">
-                    <p class="text-[9px] font-black text-zinc-600 uppercase mb-3 tracking-widest italic">Residência</p>
-                    <textarea id="edit-neighborhood" oninput="updateModalState()" class="editable-field h-16 bg-transparent resize-none leading-tight italic" placeholder="Bairro..."></textarea>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-card p-4 bg-zinc-900/30">
+                        <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest italic">Residência (Bairro)</p>
+                        <input type="text" id="edit-neighborhood" oninput="updateModalState()" class="editable-field italic" placeholder="Bairro...">
+                    </div>
+                    <div class="glass-card p-4 bg-zinc-900/30">
+                        <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest italic">Cidade/Estado</p>
+                        <input type="text" id="edit-city" oninput="updateModalState()" class="editable-field italic" placeholder="Cidade/UF...">
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 bg-zinc-900/30">
+                    <p class="text-[9px] font-black text-rose-500/60 uppercase mb-2 tracking-widest italic">Instagram</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-zinc-500 text-sm">@</span>
+                        <input type="text" id="edit-instagram" oninput="updateModalState()" class="editable-field italic" placeholder="username...">
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 bg-zinc-900/30">
+                    <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest italic">Vibe Summary</p>
+                    <input type="text" id="edit-vibe" oninput="updateModalState()" class="editable-field italic text-zinc-300" placeholder="Resumo rápido...">
                 </div>
             </div>
 
+            <!-- Badges -->
             <div class="flex justify-center gap-3">
                 <div onclick="toggleBadge('bebe')" id="badge-bebe" class="badge-circle">
                     <i data-lucide="wine" class="text-rose-400"></i>
@@ -334,8 +368,8 @@
             </div>
 
             <div class="bg-zinc-900/30 p-5 rounded-2xl border border-white/5 space-y-3">
-                <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">Memória Estratégica</p>
-                <textarea id="edit-topics" oninput="updateModalState()" class="w-full h-24 bg-transparent text-[11px] text-zinc-400 italic outline-none resize-none" placeholder="O que você não pode esquecer..."></textarea>
+                <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">Memória Estratégica (Hot Topics)</p>
+                <textarea id="edit-topics" oninput="updateModalState()" class="w-full h-24 bg-transparent text-[11px] text-zinc-400 italic outline-none resize-none leading-relaxed" placeholder="Assuntos que renderam ou curiosidades..."></textarea>
             </div>
 
             <button onclick="saveAndCloseModal()" class="w-full bg-white text-black text-[11px] font-black uppercase py-4 rounded-2xl transition-all active:scale-95 tracking-widest italic">Atualizar Dossiê</button>
@@ -370,6 +404,7 @@
             if (el) el.textContent = text;
         }
 
+        // --- Extracção de dados ---
         function extractFromText(content) {
             const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
             const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
@@ -382,11 +417,12 @@
                 status: 'conheci',
                 favorito: false,
                 data: new Date().toLocaleDateString('pt-PT'),
-                instagram: instaMatch ? instaMatch[0] : "",
+                instagram: instaMatch ? instaMatch[1] : "",
                 profissao: "",
                 formacao: "",
                 bairro: "",
                 cidade: "",
+                vibe_summary: "",
                 filhos: 0,
                 bebe: false,
                 fuma: false,
@@ -398,11 +434,8 @@
 
         function processTextImport() {
             const inputEl = document.getElementById('wa-text-input');
-            if (!inputEl) return;
-            const content = inputEl.value;
-            if(!content) return;
-
-            const newMatch = extractFromText(content);
+            if (!inputEl || !inputEl.value) return;
+            const newMatch = extractFromText(inputEl.value);
             window.matches.unshift(newMatch);
             inputEl.value = "";
             save();
@@ -411,18 +444,12 @@
 
         async function handleMultiFileUpload(input) {
             if (!input.files || input.files.length === 0) return;
-            
             const status = document.getElementById('cloud-status');
-            if (status) {
-                status.classList.remove('bg-zinc-700', 'bg-green-500', 'bg-red-500');
-                status.classList.add('bg-blue-500', 'animate-pulse');
-            }
+            if (status) status.classList.add('bg-blue-500', 'animate-pulse');
 
             for (let i = 0; i < input.files.length; i++) {
-                const file = input.files[i];
-                const text = await file.text();
-                const newMatch = extractFromText(text);
-                window.matches.unshift(newMatch);
+                const text = await input.files[i].text();
+                window.matches.unshift(extractFromText(text));
             }
 
             input.value = ""; 
@@ -435,7 +462,7 @@
             window.matches.unshift({
                 id: id, nome: "Novo Registro", idade: "", status: 'conheci', favorito: false,
                 data: new Date().toLocaleDateString('pt-PT'), instagram: "", profissao: "",
-                formacao: "", bairro: "", cidade: "", filhos: 0, bebe: false, fuma: false,
+                formacao: "", bairro: "", cidade: "", vibe_summary: "", filhos: 0, bebe: false, fuma: false,
                 pets: false, memoria_estrategica: "", foto: null
             });
             save(); openModal(id);
@@ -464,16 +491,17 @@
                 'edit-name': m.nome,
                 'edit-age': m.idade,
                 'edit-profession': m.profissao,
+                'edit-formation': m.formacao,
                 'edit-neighborhood': m.bairro,
+                'edit-city': m.cidade,
+                'edit-instagram': m.instagram,
+                'edit-vibe': m.vibe_summary,
                 'edit-topics': m.memoria_estrategica
             };
 
             for (let id in fields) {
                 const el = document.getElementById(id);
-                if (el) {
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = fields[id] || "";
-                    else el.textContent = fields[id] || "";
-                }
+                if (el) el.value = fields[id] || "";
             }
 
             const updateBadgeUI = (badgeId, active, label = null) => {
@@ -504,8 +532,7 @@
                 }
             }
 
-            const modal = document.getElementById('match-modal');
-            if (modal) modal.classList.remove('hidden');
+            document.getElementById('match-modal').classList.remove('hidden');
             lucide.createIcons();
         }
 
@@ -532,17 +559,16 @@
         function updateModalState() {
             const m = window.matches.find(x => x.id === currentEditingId);
             if (!m) return;
-            const nameEl = document.getElementById('edit-name');
-            const ageEl = document.getElementById('edit-age');
-            const profEl = document.getElementById('edit-profession');
-            const neighEl = document.getElementById('edit-neighborhood');
-            const topEl = document.getElementById('edit-topics');
-
-            if (nameEl) m.nome = nameEl.value;
-            if (ageEl) m.idade = ageEl.value;
-            if (profEl) m.profissao = profEl.value;
-            if (neighEl) m.bairro = neighEl.value;
-            if (topEl) m.memoria_estrategica = topEl.value;
+            const getVal = (id) => document.getElementById(id)?.value || "";
+            m.nome = getVal('edit-name');
+            m.idade = getVal('edit-age');
+            m.profissao = getVal('edit-profession');
+            m.formacao = getVal('edit-formation');
+            m.bairro = getVal('edit-neighborhood');
+            m.cidade = getVal('edit-city');
+            m.instagram = getVal('edit-instagram');
+            m.vibe_summary = getVal('edit-vibe');
+            m.memoria_estrategica = getVal('edit-topics');
         }
 
         function saveAndCloseModal() {
@@ -550,33 +576,23 @@
         }
 
         function closeModal() { 
-            const modal = document.getElementById('match-modal');
-            if (modal) modal.classList.add('hidden'); 
+            document.getElementById('match-modal').classList.add('hidden'); 
             render(); 
         }
         
         async function save() { 
             localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(window.matches));
-            
             const status = document.getElementById('cloud-status');
-            if (status) {
-                status.classList.remove('bg-zinc-700', 'bg-green-500', 'bg-red-500');
-                status.classList.add('bg-blue-500', 'animate-pulse');
-            }
+            if (status) status.classList.add('bg-blue-500', 'animate-pulse');
 
             try {
-                const response = await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(window.matches)
-                });
-                
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(window.matches) });
                 if (status) {
                     status.classList.remove('animate-pulse');
                     status.classList.replace('bg-blue-500', 'bg-green-500');
                     setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
                 }
             } catch(e) { 
-                console.error("Erro ao salvar:", e);
                 if (status) {
                     status.classList.remove('animate-pulse');
                     status.classList.replace('bg-blue-500', 'bg-red-500'); 
@@ -594,14 +610,14 @@
                 const resp = await fetch(SCRIPT_URL);
                 const data = await resp.json();
                 if(data && data.length > 0) window.matches = data;
-                if (status) {
-                    status.classList.replace('bg-zinc-700', 'bg-green-500');
-                    setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
-                }
+                if (status) status.classList.replace('bg-zinc-700', 'bg-green-500');
             } catch(e) { 
                 if (status) status.classList.replace('bg-zinc-700', 'bg-red-500'); 
             }
-            if (status) status.classList.remove('animate-pulse');
+            if (status) {
+                status.classList.remove('animate-pulse');
+                setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
+            }
             render();
         }
 
@@ -650,18 +666,12 @@
                     }).join('');
                 }
                 const b = document.getElementById('status-bars');
-                const colors = { conheci: '#3b82f6', sai: '#a855f7', fiquei: '#ec4899', transei: '#ef4444' };
-                if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `<div class="space-y-1"><div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div><div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${colors[k]}"></div></div></div>`).join('');
+                if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `<div class="space-y-1"><div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div><div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${k==='conheci'?'#3b82f6':k==='sai'?'#a855f7':k==='fiquei'?'#ec4899':'#ef4444'}"></div></div></div>`).join('');
                 
                 const alphabetGrid = document.getElementById('full-alphabet-grid');
                 if (alphabetGrid) {
                     const counts = {};
-                    window.matches.forEach(m => {
-                        if(m.nome) {
-                            const initial = m.nome[0].toUpperCase();
-                            counts[initial] = (counts[initial] || 0) + 1;
-                        }
-                    });
+                    window.matches.forEach(m => { if(m.nome) { const initial = m.nome[0].toUpperCase(); counts[initial] = (counts[initial] || 0) + 1; } });
                     alphabetGrid.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => {
                         const count = counts[l] || 0;
                         return `<div class="p-3 rounded-2xl border ${count ? 'bg-zinc-800 border-rose-500/20 text-white' : 'bg-zinc-900/40 border-white/5 text-zinc-800'} flex flex-col items-center">
@@ -678,18 +688,15 @@
         function updateStatus(id, s) { window.matches = window.matches.map(m => m.id === id ? { ...m, status: s } : m); save(); render(); }
         function confirmReset() { if(confirm("Apagar tudo? Isso limpará a planilha e o local.")) { window.matches = []; save(); render(); } }
 
-        const photoInput = document.getElementById('match-photo-input');
-        if (photoInput) {
-            photoInput.addEventListener('change', (e) => {
-                const file = e.target.files[0]; if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    window.matches = window.matches.map(m => m.id === currentEditingId ? { ...m, foto: ev.target.result } : m);
-                    save(); openModal(currentEditingId);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+        document.getElementById('match-photo-input').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                window.matches = window.matches.map(m => m.id === currentEditingId ? { ...m, foto: ev.target.result } : m);
+                save(); openModal(currentEditingId);
+            };
+            reader.readAsDataURL(file);
+        });
 
         window.onload = load;
     </script>
