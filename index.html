@@ -133,7 +133,7 @@
 <body class="no-scrollbar">
 
     <div id="real-app" class="min-h-screen pb-32">
-        <!-- Header: Espaçamento reduzido -->
+        <!-- Header -->
         <header class="sticky top-0 z-40 bg-[#09090b]/80 backdrop-blur-xl px-6 py-3 flex justify-between items-center max-w-lg mx-auto">
             <div class="flex items-center gap-3">
                 <span class="text-xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
@@ -142,7 +142,7 @@
                     <span class="text-[11px] font-black text-yellow-500" id="global-score">0.00</span>
                 </div>
             </div>
-            <!-- Avatar Masculino -->
+            <!-- Botão de Perfil/Settings -->
             <button onclick="switchTab('profile')" class="pro-avatar-ring w-10 h-10 active:scale-90 transition-transform overflow-hidden">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="User" class="w-full h-full rounded-full border-2 border-zinc-950 object-cover bg-zinc-800">
             </button>
@@ -154,7 +154,7 @@
                     <div class="flex gap-4 overflow-x-auto no-scrollbar py-1" id="pro-accounts-scroll"></div>
                 </section>
 
-                <!-- WA Import (ZIP Suporte) -->
+                <!-- WA Import -->
                 <section class="glass-card p-6 border border-white/5">
                     <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="zap" class="w-4 h-4 text-pink-500 fill-current"></i>
@@ -169,7 +169,7 @@
                         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-500"></i> Analisar Dossiê
                     </button>
                     <div id="import-loader" class="hidden py-4 text-center text-[10px] text-zinc-500 animate-pulse font-black uppercase">IA a processar...</div>
-                    <div id="api-error-msg" class="hidden mt-2 text-[8px] font-bold text-red-500 uppercase text-center leading-tight">Erro na IA. Verifique sua API Key nas configurações.</div>
+                    <div id="api-error-msg" class="hidden mt-2 text-[9px] font-bold text-red-500 uppercase text-center leading-tight bg-red-500/10 p-3 rounded-xl border border-red-500/20">Erro na IA. Verifique sua API Key nas configurações.</div>
                 </section>
 
                 <section class="grid grid-cols-2 gap-4">
@@ -237,21 +237,24 @@
                     <div class="pro-avatar-ring w-24 h-24 mx-auto p-1">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="avatar" class="w-full h-full rounded-full border-4 border-zinc-950 bg-zinc-900">
                     </div>
-                    <h2 class="text-2xl font-black italic">Settings</h2>
+                    <h2 class="text-2xl font-black italic">Configurações</h2>
                 </div>
                 
                 <div class="px-6 space-y-6">
                     <!-- Configuração da API Key -->
                     <div class="space-y-2">
-                        <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest px-1 flex items-center gap-2">
-                            <i data-lucide="key" class="w-3 h-3"></i> Google AI API Key
+                        <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-1 flex items-center gap-2">
+                            <i data-lucide="key" class="w-3 h-3 text-rose-500"></i> Google AI API Key
                         </label>
-                        <input type="password" id="user-api-key" onblur="saveUserKey()" placeholder="Cole sua chave do Google AI Studio..." class="insta-input bg-zinc-900/50 border-zinc-800">
-                        <p class="text-[8px] text-zinc-600 font-bold leading-tight">Necessário para rodar fora do Canvas. Obtenha em aistudio.google.com</p>
+                        <input type="password" id="user-api-key" onblur="saveUserKey()" placeholder="Cole sua chave aqui..." class="insta-input bg-zinc-900/50 border-zinc-800 focus:border-rose-500/50">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-[8px] text-zinc-600 font-bold leading-tight uppercase">Obtenha sua chave gratuita em:</p>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-rose-500 font-black underline italic">aistudio.google.com/app/apikey</a>
+                        </div>
                     </div>
 
                     <div class="pt-4 border-t border-white/5">
-                        <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 border border-red-500/10 py-4 rounded-2xl font-black text-xs uppercase active:scale-95">Reset Data</button>
+                        <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 border border-red-500/10 py-4 rounded-2xl font-black text-xs uppercase active:scale-95">Apagar Todos os Dados</button>
                     </div>
                 </div>
             </div>
@@ -322,14 +325,17 @@
     </div>
 
     <script>
-        const apiKey = ""; // Deixe vazio para usar a chave configurada no perfil ou injetada pelo ambiente
+        // Use a chave do localStorage se existir. O Canvas injeta automaticamente a chave se o valor for ""
+        const apiKey = ""; 
         let matches = JSON.parse(localStorage.getItem('mapMatches_vFinal_v6')) || [];
         let activeTab = 'home';
         let currentEditingId = null;
 
         function saveUserKey() {
-            const val = document.getElementById('user-api-key').value;
-            localStorage.setItem('map_user_api_key', val);
+            const val = document.getElementById('user-api-key').value.trim();
+            if (val) {
+                localStorage.setItem('map_user_api_key', val);
+            }
         }
 
         function safeSetText(id, text) {
@@ -364,10 +370,10 @@
                         statusText.textContent = `Extraído: ${txtFile.name}`;
                         importBtn.classList.remove('hidden');
                     } else {
-                        statusText.textContent = "Subir ficheiro .txt ou .zip";
+                        statusText.textContent = "ZIP sem ficheiro .txt";
                     }
                 } catch (err) {
-                    statusText.textContent = "Subir ficheiro .txt ou .zip";
+                    statusText.textContent = "Erro ao ler ZIP";
                 }
             } else if (file.name.endsWith('.txt')) {
                 const reader = new FileReader();
@@ -384,7 +390,7 @@
             const content = localStorage.getItem('temp_wa_content');
             if (!content) return;
             
-            // Tenta pegar a chave do localStorage ou do código
+            // Ordem de busca da chave: 1. LocalStorage (manual) | 2. Variável apiKey (ambiente Canvas)
             const currentKey = localStorage.getItem('map_user_api_key') || apiKey;
             
             const loader = document.getElementById('import-loader');
@@ -394,6 +400,17 @@
             if (loader) loader.classList.remove('hidden');
             if (btn) btn.classList.add('hidden');
             if (errorMsg) errorMsg.classList.add('hidden');
+
+            // Validação de chave antes de tentar o fetch
+            if (!currentKey) {
+                if (errorMsg) {
+                    errorMsg.textContent = "Chave API ausente. Vá em 'Settings' e insira sua chave.";
+                    errorMsg.classList.remove('hidden');
+                }
+                if (loader) loader.classList.add('hidden');
+                if (btn) btn.classList.remove('hidden');
+                return;
+            }
 
             const systemPrompt = `Analise este chat do WhatsApp e retorne um JSON rigoroso: {name, age, profession, education, neighborhood, city, state, kidsCount, hobbies, vibeSummary, hotTopics, lifestyle: {drinks, smokes, has_pets, diet}, lastMeeting, nextMeeting, instagram}. 
             IMPORTANTE: No campo 'hotTopics', gere um 'Resumo Narrativo Estratégico' focado em personalidade, valores, filosofia e limites. Retorne APENAS o JSON.`;
@@ -408,7 +425,10 @@
                     })
                 });
 
-                if (!resp.ok) throw new Error("API Failure");
+                if (!resp.ok) {
+                    const errorData = await resp.json();
+                    throw new Error(errorData.error?.message || "API Failure");
+                }
 
                 let result = await resp.json();
                 let data = JSON.parse(result.candidates[0].content.parts[0].text);
@@ -428,7 +448,10 @@
                 statusText.textContent = "Subir ficheiro .txt ou .zip";
                 importBtn.classList.add('hidden');
             } catch (e) { 
-                if (errorMsg) errorMsg.classList.remove('hidden');
+                if (errorMsg) {
+                    errorMsg.textContent = "Erro na IA: " + (e.message.includes("API key") ? "Chave Inválida" : "Falha na conexão");
+                    errorMsg.classList.remove('hidden');
+                }
             } finally { 
                 if (loader) loader.classList.add('hidden'); 
             }
