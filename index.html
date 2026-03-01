@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Match Analytics Pro v03</title>
+    <title>Match Analytics Pro v04</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -113,7 +113,6 @@
             outline: none;
         }
 
-        /* Funnel Styling */
         .funnel-step {
             height: 40px;
             display: flex;
@@ -128,12 +127,28 @@
             position: relative;
             margin: 0 auto;
         }
+
+        .editable-field {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            color: #fff;
+            width: 100%;
+            font-size: 0.75rem;
+        }
+        .editable-field:focus { border-color: var(--accent-pink); outline: none; }
+        
+        .toggle-btn {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toggle-active { color: var(--accent-pink); opacity: 1 !important; }
     </style>
 </head>
 <body class="no-scrollbar">
 
     <div id="real-app" class="min-h-screen pb-32">
-        <!-- Header -->
         <header class="sticky top-0 z-40 bg-[#09090b]/80 backdrop-blur-xl px-6 py-3 flex justify-between items-center max-w-lg mx-auto">
             <div class="flex items-center gap-3">
                 <span class="text-xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
@@ -142,7 +157,6 @@
                     <span class="text-[11px] font-black text-yellow-500" id="global-score">0.00</span>
                 </div>
             </div>
-            <!-- Botão de Perfil/Settings -->
             <button onclick="switchTab('profile')" class="pro-avatar-ring w-10 h-10 active:scale-90 transition-transform overflow-hidden">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="User" class="w-full h-full rounded-full border-2 border-zinc-950 object-cover bg-zinc-800">
             </button>
@@ -154,22 +168,26 @@
                     <div class="flex gap-4 overflow-x-auto no-scrollbar py-1" id="pro-accounts-scroll"></div>
                 </section>
 
-                <!-- WA Import -->
                 <section class="glass-card p-6 border border-white/5">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i data-lucide="zap" class="w-4 h-4 text-pink-500 fill-current"></i>
-                        <h3 class="text-xs font-black text-zinc-100 uppercase">WA AI Import</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4 text-pink-500 fill-current"></i>
+                            <h3 class="text-xs font-black text-zinc-100 uppercase tracking-tight">Smart Import</h3>
+                        </div>
+                        <button onclick="createNewMatch()" class="text-[9px] font-black bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-white/10 transition-colors">Novo Manual</button>
                     </div>
+                    
                     <div id="wa-dropzone" class="dropzone flex flex-col items-center gap-2 mb-4">
                         <i data-lucide="upload" class="w-6 h-6 text-zinc-600"></i>
-                        <p id="wa-file-status" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest text-center">Subir ficheiro .txt ou .zip</p>
+                        <p id="wa-file-status" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest text-center">Subir ficheiro .txt ou .zip para extração</p>
                         <input type="file" id="wa-file-input" class="hidden" accept=".txt,.zip">
                     </div>
-                    <button id="btn-import-wa" onclick="processImport()" class="hidden w-full bg-[#18181b] hover:bg-zinc-800 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-white/5">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-500"></i> Analisar Dossiê
+                    
+                    <button id="btn-import-wa" onclick="processImportLocal()" class="hidden w-full bg-[#18181b] hover:bg-zinc-800 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-white/5">
+                        <i data-lucide="search" class="w-3.5 h-3.5 text-pink-500"></i> Localizar Informações
                     </button>
-                    <div id="import-loader" class="hidden py-4 text-center text-[10px] text-zinc-500 animate-pulse font-black uppercase">IA a processar...</div>
-                    <div id="api-error-msg" class="hidden mt-2 text-[9px] font-bold text-red-500 uppercase text-center leading-tight bg-red-500/10 p-3 rounded-xl border border-red-500/20">Erro na IA. Verifique sua API Key nas configurações.</div>
+                    
+                    <div id="import-loader" class="hidden py-4 text-center text-[10px] text-zinc-500 animate-pulse font-black uppercase tracking-widest">A processar texto...</div>
                 </section>
 
                 <section class="grid grid-cols-2 gap-4">
@@ -203,8 +221,6 @@
 
             <div id="tab-stats" class="tab-content space-y-6">
                 <h2 class="text-2xl font-black italic tracking-tighter">Métricas</h2>
-                
-                <!-- Funil de Conversão -->
                 <div class="glass-card p-6 space-y-6">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="filter" class="w-4 h-4 text-rose-500"></i>
@@ -222,7 +238,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="status-bars" class="glass-card p-6 space-y-4"></div>
                 <div id="full-alphabet-grid" class="grid grid-cols-4 gap-2"></div>
             </div>
@@ -239,23 +254,11 @@
                     </div>
                     <h2 class="text-2xl font-black italic">Configurações</h2>
                 </div>
-                
                 <div class="px-6 space-y-6">
-                    <!-- Configuração da API Key -->
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-1 flex items-center gap-2">
-                            <i data-lucide="key" class="w-3 h-3 text-rose-500"></i> Google AI API Key
-                        </label>
-                        <input type="password" id="user-api-key" onblur="saveUserKey()" placeholder="Cole sua chave aqui..." class="insta-input bg-zinc-900/50 border-zinc-800 focus:border-rose-500/50">
-                        <div class="flex flex-col gap-1">
-                            <p class="text-[8px] text-zinc-600 font-bold leading-tight uppercase">Obtenha sua chave gratuita em:</p>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-rose-500 font-black underline italic">aistudio.google.com/app/apikey</a>
-                        </div>
-                    </div>
-
                     <div class="pt-4 border-t border-white/5">
                         <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 border border-red-500/10 py-4 rounded-2xl font-black text-xs uppercase active:scale-95">Apagar Todos os Dados</button>
                     </div>
+                    <p class="text-[8px] text-zinc-500 text-center font-bold uppercase tracking-widest">Versão sem dependência de IA</p>
                 </div>
             </div>
         </main>
@@ -270,10 +273,11 @@
         </nav>
     </div>
 
-    <!-- MODAL DOSSIÊ -->
+    <!-- MODAL DOSSIÊ EDITÁVEL -->
     <div id="match-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center p-4 z-[110]">
         <div class="glass-card w-full max-w-lg p-8 space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
-            <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-zinc-900 rounded-full text-zinc-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            
             <div class="flex flex-col items-center gap-4">
                 <div class="relative group">
                     <div id="modal-photo-container" class="w-24 h-24 rounded-2xl bg-zinc-900 border-2 border-zinc-800 overflow-hidden flex items-center justify-center">
@@ -285,59 +289,57 @@
                         <input type="file" class="hidden" id="match-photo-input" accept="image/*">
                     </label>
                 </div>
-                <div class="text-center w-full max-w-[200px]">
-                    <h2 id="modal-name" class="text-xl font-black italic tracking-tighter truncate">---</h2>
-                    <input type="text" id="modal-insta-input" class="insta-input mt-2" placeholder="@instagram" onblur="saveInsta()">
+                <div class="text-center w-full space-y-2">
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="edit-name" placeholder="Nome" oninput="updateModalState()" class="text-center text-xl font-black italic tracking-tighter bg-transparent border-b border-white/5 outline-none w-full">
+                        <input type="number" id="edit-age" placeholder="Idade" oninput="updateModalState()" class="text-center text-xl font-black italic tracking-tighter bg-transparent border-b border-white/5 outline-none w-20">
+                    </div>
+                    <input type="text" id="modal-insta-input" class="insta-input" placeholder="@instagram" oninput="updateModalState()">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-zinc-900/40 p-5 rounded-2xl border border-white/5">
-                    <p class="text-[8px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Carreira</p>
-                    <p id="modal-job" class="text-[11px] font-bold leading-tight">---</p>
-                    <p id="modal-edu" class="text-[9px] text-zinc-500 mt-1">---</p>
+                    <p class="text-[8px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Carreira & Educação</p>
+                    <input type="text" id="edit-profession" placeholder="Profissão" oninput="updateModalState()" class="editable-field mb-1">
+                    <input type="text" id="edit-education" placeholder="Formação" oninput="updateModalState()" class="editable-field">
                 </div>
                 <div class="bg-zinc-900/40 p-5 rounded-2xl border border-white/5">
                     <p class="text-[8px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Residência</p>
-                    <p id="modal-location" class="text-[11px] font-bold leading-tight">---</p>
+                    <input type="text" id="edit-neighborhood" placeholder="Bairro" oninput="updateModalState()" class="editable-field mb-1">
+                    <input type="text" id="edit-city" placeholder="Cidade" oninput="updateModalState()" class="editable-field">
                 </div>
             </div>
 
             <div class="grid grid-cols-4 gap-2">
-                <div id="badge-drinks" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20"><i data-lucide="wine" class="w-4 h-4 text-pink-400"></i><span class="text-[7px] font-black uppercase">Bebe</span></div>
-                <div id="badge-kids" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20"><i data-lucide="baby" class="w-4 h-4 text-blue-400"></i><span id="label-kids" class="text-[7px] font-black uppercase">Filhos</span></div>
-                <div id="badge-pets" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20"><i data-lucide="dog" class="w-4 h-4 text-yellow-400"></i><span class="text-[7px] font-black uppercase">Pets</span></div>
-                <div id="badge-smokes" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20"><i data-lucide="cigar" class="w-4 h-4 text-zinc-400"></i><span class="text-[7px] font-black uppercase">Fuma</span></div>
+                <div onclick="toggleBadge('drinks')" id="badge-drinks" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="wine" class="w-4 h-4"></i><span class="text-[7px] font-black uppercase">Bebe</span></div>
+                <div onclick="toggleBadge('kids')" id="badge-kids" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="baby" class="w-4 h-4"></i><span id="label-kids" class="text-[7px] font-black uppercase">Filhos</span></div>
+                <div onclick="toggleBadge('pets')" id="badge-pets" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="dog" class="w-4 h-4"></i><span class="text-[7px] font-black uppercase">Pets</span></div>
+                <div onclick="toggleBadge('smokes')" id="badge-smokes" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="cigar" class="w-4 h-4"></i><span class="text-[7px] font-black uppercase">Fuma</span></div>
             </div>
 
             <div class="bg-zinc-900/40 p-5 rounded-2xl border border-white/5 space-y-3">
                 <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2 italic">
                     <i data-lucide="sparkles" class="w-3 h-3 text-pink-500"></i> Memória Estratégica
                 </p>
-                <div id="modal-topics" class="text-[10px] text-zinc-400 leading-relaxed font-medium italic whitespace-pre-wrap">Dossiê...</div>
+                <textarea id="edit-topics" placeholder="Anote detalhes importantes aqui..." oninput="updateModalState()" class="w-full h-24 bg-transparent border border-white/5 rounded-xl p-3 text-[10px] text-zinc-400 italic outline-none focus:border-pink-500/30 resize-none"></textarea>
             </div>
 
-            <div class="flex justify-between text-[9px] font-black bg-zinc-900/60 p-5 rounded-2xl border border-white/5 uppercase italic tracking-tighter">
-                <div>Último: <span id="modal-last" class="text-zinc-500">---</span></div>
-                <div class="text-pink-500">Próximo: <span id="modal-next">AGENDAR</span></div>
+            <div class="flex justify-between items-center bg-zinc-900/60 p-5 rounded-2xl border border-white/5">
+                <div class="text-[9px] font-black uppercase tracking-tighter text-zinc-500 italic">
+                    Salvo em: <span id="modal-date" class="text-zinc-300">---</span>
+                </div>
+                <button onclick="saveAndCloseModal()" class="bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black uppercase px-6 py-3 rounded-xl transition-all active:scale-95">Salvar Dossiê</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Use a chave do localStorage se existir. O Canvas injeta automaticamente a chave se o valor for ""
-        const apiKey = ""; 
         let matches = JSON.parse(localStorage.getItem('mapMatches_vFinal_v6')) || [];
         let activeTab = 'home';
         let currentEditingId = null;
 
-        function saveUserKey() {
-            const val = document.getElementById('user-api-key').value.trim();
-            if (val) {
-                localStorage.setItem('map_user_api_key', val);
-            }
-        }
-
+        // Função de utilidade para atualizar texto de elementos de forma segura
         function safeSetText(id, text) {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
@@ -351,9 +353,7 @@
         if (dropzone) {
             dropzone.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length) {
-                    handleFileSelection(e.target.files[0]);
-                }
+                if (e.target.files.length) handleFileSelection(e.target.files[0]);
             });
         }
 
@@ -369,12 +369,8 @@
                         localStorage.setItem('temp_wa_content', content);
                         statusText.textContent = `Extraído: ${txtFile.name}`;
                         importBtn.classList.remove('hidden');
-                    } else {
-                        statusText.textContent = "ZIP sem ficheiro .txt";
                     }
-                } catch (err) {
-                    statusText.textContent = "Erro ao ler ZIP";
-                }
+                } catch (err) { statusText.textContent = "Erro ao ler ZIP"; }
             } else if (file.name.endsWith('.txt')) {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
@@ -386,93 +382,151 @@
             }
         }
 
-        async function processImport() {
-            const content = localStorage.getItem('temp_wa_content');
-            if (!content) return;
-            
-            // Ordem de busca da chave: 1. LocalStorage (manual) | 2. Variável apiKey (ambiente Canvas)
-            const currentKey = localStorage.getItem('map_user_api_key') || apiKey;
-            
+        function processImportLocal() {
+            const content = localStorage.getItem('temp_wa_content') || "";
             const loader = document.getElementById('import-loader');
             const btn = document.getElementById('btn-import-wa');
-            const errorMsg = document.getElementById('api-error-msg');
             
-            if (loader) loader.classList.remove('hidden');
-            if (btn) btn.classList.add('hidden');
-            if (errorMsg) errorMsg.classList.add('hidden');
+            loader.classList.remove('hidden');
+            btn.classList.add('hidden');
 
-            // Validação de chave antes de tentar o fetch
-            if (!currentKey) {
-                if (errorMsg) {
-                    errorMsg.textContent = "Chave API ausente. Vá em 'Settings' e insira sua chave.";
-                    errorMsg.classList.remove('hidden');
-                }
-                if (loader) loader.classList.add('hidden');
-                if (btn) btn.classList.remove('hidden');
-                return;
-            }
+            setTimeout(() => {
+                const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
+                const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
+                const nameMatch = content.match(/(?:\]\s*)([A-Z][a-zà-ú]+)(?:\s*:)/);
 
-            const systemPrompt = `Analise este chat do WhatsApp e retorne um JSON rigoroso: {name, age, profession, education, neighborhood, city, state, kidsCount, hobbies, vibeSummary, hotTopics, lifestyle: {drinks, smokes, has_pets, diet}, lastMeeting, nextMeeting, instagram}. 
-            IMPORTANTE: No campo 'hotTopics', gere um 'Resumo Narrativo Estratégico' focado em personalidade, valores, filosofia e limites. Retorne APENAS o JSON.`;
-            
-            try {
-                let resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`, {
-                    method: 'POST',
-                    body: JSON.stringify({ 
-                        contents: [{ parts: [{ text: content.substring(0, 15000) }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }, 
-                        generationConfig: { responseMimeType: "application/json" } 
-                    })
-                });
+                const data = {
+                    name: nameMatch ? nameMatch[1] : "Novo Match",
+                    age: ageMatch ? ageMatch[1] : null,
+                    instagram: instaMatch ? instaMatch[0] : "",
+                    profession: content.match(/(?:sou|trabalho com|trabalho de)\s+([a-zA-Zà-ú\s]+)/i)?.[1] || "",
+                    neighborhood: content.match(/(?:moro no|moro na|moro em)\s+([a-zA-Zà-ú\s]+)/i)?.[1] || "",
+                    hotTopics: "Informações extraídas automaticamente. Revise o dossiê.",
+                    lifestyle: { drinks: false, smokes: false, has_pets: false },
+                    kidsCount: 0
+                };
 
-                if (!resp.ok) {
-                    const errorData = await resp.json();
-                    throw new Error(errorData.error?.message || "API Failure");
-                }
-
-                let result = await resp.json();
-                let data = JSON.parse(result.candidates[0].content.parts[0].text);
-                
-                matches.unshift({ 
+                const newMatch = { 
                     id: Date.now(), 
-                    name: data.name || "Novo Match", 
-                    age: data.age || null, 
+                    name: data.name, 
+                    age: data.age, 
                     status: 'conheci', 
                     isFavorite: false, 
                     date: new Date().toLocaleDateString('pt-PT'), 
                     details: data,
                     photo: null,
-                    instagram: data.instagram || ""
-                });
+                    instagram: data.instagram
+                };
+
+                matches.unshift(newMatch);
                 save();
-                statusText.textContent = "Subir ficheiro .txt ou .zip";
+                loader.classList.add('hidden');
+                statusText.textContent = "Subir ficheiro .txt ou .zip para extração";
                 importBtn.classList.add('hidden');
-            } catch (e) { 
-                if (errorMsg) {
-                    errorMsg.textContent = "Erro na IA: " + (e.message.includes("API key") ? "Chave Inválida" : "Falha na conexão");
-                    errorMsg.classList.remove('hidden');
-                }
-            } finally { 
-                if (loader) loader.classList.add('hidden'); 
-            }
+                openModal(newMatch.id);
+            }, 800);
+        }
+
+        function createNewMatch() {
+            const id = Date.now();
+            const newM = {
+                id: id,
+                name: "Novo Registro",
+                age: null,
+                status: 'conheci',
+                isFavorite: false,
+                date: new Date().toLocaleDateString('pt-PT'),
+                details: { lifestyle: {}, hotTopics: "" },
+                photo: null,
+                instagram: ""
+            };
+            matches.unshift(newM);
+            save();
+            openModal(id);
         }
 
         function switchTab(t) { 
             activeTab = t; 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(`tab-${t}`);
-            if (target) target.classList.add('active');
+            document.getElementById(`tab-${t}`).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
-            const activeBtn = document.getElementById(`nav-${t}`);
-            if (activeBtn) activeBtn.classList.add('nav-active');
-            
-            if (t === 'profile') {
-                document.getElementById('user-api-key').value = localStorage.getItem('map_user_api_key') || "";
-            }
-            
+            document.getElementById(`nav-${t}`).classList.add('nav-active');
             render();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        function openModal(id) {
+            currentEditingId = id;
+            const m = matches.find(x => x.id === id);
+            if (!m) return;
+            const d = m.details || { lifestyle: {} };
+            
+            document.getElementById('edit-name').value = m.name || "";
+            document.getElementById('edit-age').value = m.age || "";
+            document.getElementById('modal-insta-input').value = m.instagram || "";
+            document.getElementById('edit-profession').value = d.profession || "";
+            document.getElementById('edit-education').value = d.education || "";
+            document.getElementById('edit-neighborhood').value = d.neighborhood || "";
+            document.getElementById('edit-city').value = d.city || "";
+            document.getElementById('edit-topics').value = d.hotTopics || "";
+            document.getElementById('modal-date').textContent = m.date;
+
+            const updateBadge = (id, active) => {
+                const el = document.getElementById(`badge-${id}`);
+                if (active) el.classList.add('toggle-active');
+                else el.classList.remove('toggle-active');
+            };
+            updateBadge('drinks', d.lifestyle?.drinks);
+            updateBadge('smokes', d.lifestyle?.smokes);
+            updateBadge('pets', d.lifestyle?.has_pets);
+            updateBadge('kids', d.kidsCount > 0);
+
+            const photoImg = document.getElementById('modal-photo-img');
+            const initialSpan = document.getElementById('modal-initial');
+            const avatarSrc = getAvatarSource(m);
+            if (avatarSrc) {
+                photoImg.src = avatarSrc; photoImg.classList.remove('hidden'); initialSpan.classList.add('hidden');
+                photoImg.onerror = () => { photoImg.classList.add('hidden'); initialSpan.classList.remove('hidden'); };
+            } else { photoImg.classList.add('hidden'); initialSpan.classList.remove('hidden'); initialSpan.textContent = m.name[0]; }
+
+            document.getElementById('match-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function toggleBadge(key) {
+            const m = matches.find(x => x.id === currentEditingId);
+            if (!m) return;
+            if (!m.details.lifestyle) m.details.lifestyle = {};
+            
+            if (key === 'kids') m.details.kidsCount = m.details.kidsCount > 0 ? 0 : 1;
+            else if (key === 'pets') m.details.lifestyle.has_pets = !m.details.lifestyle.has_pets;
+            else m.details.lifestyle[key] = !m.details.lifestyle[key];
+            
+            openModal(currentEditingId);
+            save();
+        }
+
+        function updateModalState() {
+            const m = matches.find(x => x.id === currentEditingId);
+            if (!m) return;
+            m.name = document.getElementById('edit-name').value;
+            m.age = document.getElementById('edit-age').value;
+            m.instagram = document.getElementById('modal-insta-input').value;
+            m.details.profession = document.getElementById('edit-profession').value;
+            m.details.education = document.getElementById('edit-education').value;
+            m.details.neighborhood = document.getElementById('edit-neighborhood').value;
+            m.details.city = document.getElementById('edit-city').value;
+            m.details.hotTopics = document.getElementById('edit-topics').value;
+        }
+
+        function saveAndCloseModal() {
+            updateModalState();
+            save();
+            closeModal();
+        }
+
+        function closeModal() { document.getElementById('match-modal').classList.add('hidden'); render(); }
+        function save() { localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(matches)); }
 
         function getAvatarSource(m) {
             if (m.photo) return m.photo;
@@ -482,70 +536,6 @@
             }
             return null;
         }
-
-        function openModal(id) {
-            currentEditingId = id;
-            const m = matches.find(x => x.id === id);
-            if (!m) return;
-            const d = m.details || { lifestyle: {} };
-            
-            safeSetText('modal-name', `${m.name}${m.age ? `, ${m.age}` : ''}`);
-            safeSetText('modal-initial', m.name[0]);
-            safeSetText('modal-job', d.profession || "---");
-            safeSetText('modal-edu', d.education || "");
-            safeSetText('modal-location', d.neighborhood || "---");
-            safeSetText('modal-topics', d.hotTopics || d.vibeSummary || "Sem resumo disponível.");
-            safeSetText('modal-last', d.lastMeeting || "---");
-            
-            const instaInput = document.getElementById('modal-insta-input');
-            if (instaInput) instaInput.value = m.instagram || "";
-
-            const photoImg = document.getElementById('modal-photo-img');
-            const initialSpan = document.getElementById('modal-initial');
-            const avatarSrc = getAvatarSource(m);
-
-            if (photoImg && initialSpan) {
-                if (avatarSrc) {
-                    photoImg.src = avatarSrc; photoImg.classList.remove('hidden'); initialSpan.classList.add('hidden');
-                    photoImg.onerror = () => { photoImg.classList.add('hidden'); initialSpan.classList.remove('hidden'); };
-                } else { photoImg.classList.add('hidden'); initialSpan.classList.remove('hidden'); }
-            }
-
-            const setBadge = (id, cond) => { const el = document.getElementById(id); if (el) el.style.opacity = cond ? "1" : "0.2"; };
-            setBadge('badge-drinks', d.lifestyle?.drinks);
-            setBadge('badge-smokes', d.lifestyle?.smokes);
-            setBadge('badge-pets', d.lifestyle?.has_pets);
-            setBadge('badge-kids', d.kidsCount > 0);
-            safeSetText('label-kids', d.kidsCount > 0 ? `Filhos (${d.kidsCount})` : "Filhos");
-
-            document.getElementById('match-modal').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function saveInsta() {
-            const input = document.getElementById('modal-insta-input');
-            if (!input) return;
-            matches = matches.map(m => m.id === currentEditingId ? { ...m, instagram: input.value } : m);
-            save();
-        }
-
-        const pInput = document.getElementById('match-photo-input');
-        if (pInput) {
-            pInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    matches = matches.map(m => m.id === currentEditingId ? { ...m, photo: ev.target.result } : m);
-                    save();
-                    openModal(currentEditingId);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function closeModal() { document.getElementById('match-modal').classList.add('hidden'); }
-        function save() { localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(matches)); render(); }
 
         function render() {
             const stats = { conheci: 0, sai: 0, fiquei: 0, transei: 0 };
@@ -586,8 +576,8 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-                             <button onclick="toggleFavorite(${m.id})" class="p-2.5 ${m.isFavorite ? 'text-rose-500' : 'text-zinc-700'} transition-transform"><i data-lucide="bookmark" class="w-5 h-5 ${m.isFavorite ? 'fill-current' : ''}"></i></button>
-                             <select onchange="updateStatus(${m.id}, this.value)" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase outline-none border border-white/5 text-zinc-400">
+                             <button onclick="toggleFavorite(${m.id}); event.stopPropagation();" class="p-2.5 ${m.isFavorite ? 'text-rose-500' : 'text-zinc-700'} transition-transform"><i data-lucide="bookmark" class="w-5 h-5 ${m.isFavorite ? 'fill-current' : ''}"></i></button>
+                             <select onchange="updateStatus(${m.id}, this.value); event.stopPropagation();" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase outline-none border border-white/5 text-zinc-400">
                                 <option value="conheci" ${m.status === 'conheci' ? 'selected' : ''}>Conheci</option>
                                 <option value="sai" ${m.status === 'sai' ? 'selected' : ''}>Saí</option>
                                 <option value="fiquei" ${m.status === 'fiquei' ? 'selected' : ''}>Fiquei</option>
@@ -619,7 +609,6 @@
                     safeSetText('funnel-eff', `${total > 0 ? ((stats.transei / total) * 100).toFixed(0) : 0}%`);
                     safeSetText('funnel-qual', `${total > 0 ? (((stats.sai + stats.fiquei + stats.transei) / total) * 100).toFixed(0) : 0}%`);
                 }
-
                 const b = document.getElementById('status-bars');
                 const colors = { conheci: '#3b82f6', sai: '#a855f7', fiquei: '#ec4899', transei: '#ef4444' };
                 if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `
@@ -629,14 +618,18 @@
                     </div>`).join('');
                 const grid = document.getElementById('full-alphabet-grid');
                 if (grid) {
-                    const counts = {}; matches.forEach(m => { const l = m.name[0].toUpperCase(); counts[l] = (counts[l] || 0) + 1; });
+                    const counts = {}; matches.forEach(m => { if(m.name) { const l = m.name[0].toUpperCase(); counts[l] = (counts[l] || 0) + 1; } });
                     grid.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => `<div class="p-3 rounded-2xl border ${counts[l] ? 'bg-zinc-800 border-rose-500/20 text-white' : 'bg-zinc-900/40 border-white/5 text-zinc-800'} flex flex-col items-center"><span class="text-[10px] font-black italic">${l}</span><span class="text-[8px] font-bold mt-0.5">${counts[l] || 0}</span></div>`).join('');
                 }
             }
             lucide.createIcons();
         }
 
-        window.onload = () => { lucide.createIcons(); render(); };
+        function toggleFavorite(id) { matches = matches.map(m => m.id === id ? { ...m, isFavorite: !m.isFavorite } : m); save(); render(); }
+        function updateStatus(id, s) { matches = matches.map(m => m.id === id ? { ...m, status: s } : m); save(); render(); }
+        function confirmReset() { if(confirm("Apagar todos os registros permanentemente?")) { matches = []; save(); switchTab('home'); } }
+
+        window.onload = () => { render(); };
     </script>
 </body>
 </html>
