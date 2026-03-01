@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Match Analytics Pro v04</title>
+    <title>Match Analytics Pro v05</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Biblioteca para extrair ficheiros ZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
-            --bg-dark: #09090b;
-            --card-dark: #18181b;
+            --bg-dark: #000000;
+            --card-dark: #0d0d0e;
             --accent-pink: #f43f5e;
             --accent-rose: #e11d48;
-            --accent-gold: #fbbf24;
         }
 
         body { 
@@ -28,10 +26,9 @@
         }
 
         .glass-card { 
-            background: rgba(24, 24, 27, 0.6); 
-            backdrop-filter: blur(16px); 
+            background: #0d0d0e; 
             border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 1.25rem;
+            border-radius: 1.5rem;
         }
 
         .status-conheci { border-left: 4px solid #3b82f6; }
@@ -41,26 +38,28 @@
 
         .bottom-nav-wrapper {
             position: fixed;
-            bottom: 24px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            width: fit-content;
+            width: 90%;
+            max-width: 400px;
         }
 
         .bottom-nav-container {
-            background: rgba(24, 24, 27, 0.95);
-            backdrop-filter: blur(24px);
+            background: #0d0d0e;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 999px;
-            padding: 6px;
-            display: flex; gap: 4px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            display: flex; 
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
 
         .nav-btn {
-            color: #71717a;
-            width: 48px; height: 48px;
+            color: #52525b;
+            width: 44px; height: 44px;
             transition: all 0.3s ease;
             border-radius: 999px;
             display: flex; align-items: center; justify-content: center;
@@ -68,14 +67,14 @@
 
         .nav-btn.nav-active {
             color: #ffffff;
-            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-rose) 100%);
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: tabFadeIn 0.3s ease; }
 
         @keyframes tabFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -87,178 +86,134 @@
             border-radius: 999px;
         }
 
-        .dropzone {
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background: #121214;
-            border-radius: 1.25rem;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-        }
-
         .modal-overlay {
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(12px);
             z-index: 110;
         }
 
-        .insta-input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.75rem;
-            padding: 0.5rem 1rem;
-            color: white;
-            font-size: 0.75rem;
+        .editable-field {
+            background: transparent;
+            border: none;
+            color: #fff;
             width: 100%;
+            font-size: 1rem;
+            font-weight: 700;
             outline: none;
         }
 
-        .funnel-step {
-            height: 40px;
+        .badge-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 24px;
+            background: #0d0d0e;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: white;
-            transition: width 0.5s ease;
-            position: relative;
-            margin: 0 auto;
-        }
-
-        .editable-field {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.5rem;
-            padding: 0.25rem 0.5rem;
-            color: #fff;
-            width: 100%;
-            font-size: 0.75rem;
-        }
-        .editable-field:focus { border-color: var(--accent-pink); outline: none; }
-        
-        .toggle-btn {
-            cursor: pointer;
+            gap: 4px;
+            opacity: 0.2;
             transition: all 0.2s;
+            cursor: pointer;
         }
-        .toggle-active { color: var(--accent-pink); opacity: 1 !important; }
+        .badge-circle.active {
+            opacity: 1;
+            border-color: rgba(244, 63, 94, 0.3);
+        }
+        .badge-circle i { width: 18px; height: 18px; }
+        .badge-circle span { font-size: 8px; font-weight: 900; text-transform: uppercase; }
+
+        .pro-label {
+            background: #f43f5e;
+            color: white;
+            font-size: 8px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body class="no-scrollbar">
 
-    <div id="real-app" class="min-h-screen pb-32">
-        <header class="sticky top-0 z-40 bg-[#09090b]/80 backdrop-blur-xl px-6 py-3 flex justify-between items-center max-w-lg mx-auto">
+    <div id="real-app" class="min-h-screen pb-40">
+        <header class="p-6 flex justify-between items-center max-w-lg mx-auto">
             <div class="flex items-center gap-3">
-                <span class="text-xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
-                <div class="bg-zinc-900 px-3 py-1 rounded-full flex items-center gap-2 border border-white/5">
-                    <div class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
-                    <span class="text-[11px] font-black text-yellow-500" id="global-score">0.00</span>
+                <span class="text-2xl font-black tracking-tighter">MAP<span class="text-rose-500">.</span></span>
+                <div class="bg-zinc-900/50 px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5">
+                    <div id="cloud-status" class="w-1.5 h-1.5 rounded-full bg-zinc-700"></div>
+                    <span class="text-[12px] font-black text-yellow-500" id="global-score">0.00</span>
                 </div>
             </div>
-            <button onclick="switchTab('profile')" class="pro-avatar-ring w-10 h-10 active:scale-90 transition-transform overflow-hidden">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="User" class="w-full h-full rounded-full border-2 border-zinc-950 object-cover bg-zinc-800">
+            
+            <button onclick="switchTab('profile')" class="w-11 h-11 rounded-2xl overflow-hidden border border-white/10 active:scale-90 transition-all shadow-xl shadow-rose-500/5">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="Avatar" class="w-full h-full object-cover">
             </button>
         </header>
 
-        <main class="max-w-lg mx-auto px-6 space-y-4">
-            <div id="tab-home" class="tab-content active space-y-5">
-                <section class="pt-1">
-                    <div class="flex gap-4 overflow-x-auto no-scrollbar py-1" id="pro-accounts-scroll"></div>
-                </section>
-
+        <main class="max-w-lg mx-auto px-6 space-y-6">
+            <div id="tab-home" class="tab-content active space-y-6">
                 <section class="glass-card p-6 border border-white/5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="zap" class="w-4 h-4 text-pink-500 fill-current"></i>
-                            <h3 class="text-xs font-black text-zinc-100 uppercase tracking-tight">Smart Import</h3>
+                            <i data-lucide="zap" class="w-4 h-4 text-rose-500 fill-current"></i>
+                            <h3 class="text-xs font-black text-zinc-100 uppercase tracking-widest italic">WA AI Import</h3>
                         </div>
-                        <button onclick="createNewMatch()" class="text-[9px] font-black bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-white/10 transition-colors">Novo Manual</button>
+                        <button onclick="createNewMatch()" class="text-[9px] font-black bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-white/10 transition-colors italic">Novo Manual</button>
                     </div>
                     
-                    <div id="wa-dropzone" class="dropzone flex flex-col items-center gap-2 mb-4">
-                        <i data-lucide="upload" class="w-6 h-6 text-zinc-600"></i>
-                        <p id="wa-file-status" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest text-center">Subir ficheiro .txt ou .zip para extração</p>
-                        <input type="file" id="wa-file-input" class="hidden" accept=".txt,.zip">
-                    </div>
+                    <textarea id="wa-text-input" placeholder="Cole trechos da conversa aqui..." 
+                        class="w-full h-32 bg-zinc-900/50 rounded-2xl p-4 text-sm text-zinc-400 outline-none border border-white/5 focus:border-rose-500/20 transition-all resize-none mb-4 italic"></textarea>
                     
-                    <button id="btn-import-wa" onclick="processImportLocal()" class="hidden w-full bg-[#18181b] hover:bg-zinc-800 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-white/5">
-                        <i data-lucide="search" class="w-3.5 h-3.5 text-pink-500"></i> Localizar Informações
+                    <button onclick="processTextImport()" class="w-full bg-zinc-900/80 hover:bg-zinc-800 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 border border-white/5 transition-all italic">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i> Analisar Dossiê
                     </button>
-                    
-                    <div id="import-loader" class="hidden py-4 text-center text-[10px] text-zinc-500 animate-pulse font-black uppercase tracking-widest">A processar texto...</div>
                 </section>
 
-                <section class="grid grid-cols-2 gap-4">
-                    <div class="glass-card p-5 active:scale-95 transition-all" onclick="switchTab('stats')">
-                        <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="bar-chart-2" class="w-5 h-5 text-purple-400"></i>
-                        </div>
-                        <h3 class="text-sm font-black mb-1 italic">Statistics</h3>
-                        <button class="mt-2 bg-yellow-500 text-black text-[8px] font-black px-3 py-1.5 rounded-lg uppercase">Open</button>
-                    </div>
-                    <div class="glass-card p-5 active:scale-95 transition-all">
-                        <div class="w-10 h-10 bg-rose-500/10 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="download" class="w-5 h-5 text-rose-400"></i>
-                        </div>
-                        <h3 class="text-sm font-black mb-1 italic">Install App</h3>
-                        <button class="mt-2 bg-yellow-500 text-black text-[8px] font-black px-3 py-1.5 rounded-lg uppercase">Install</button>
-                    </div>
-                </section>
-
-                <section class="space-y-4">
-                    <h3 class="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Feed Recente</h3>
-                    <div id="recent-list" class="space-y-3"></div>
-                </section>
+                <div id="recent-list" class="space-y-4"></div>
             </div>
 
             <div id="tab-search" class="tab-content space-y-6">
-                <h2 class="text-2xl font-black italic tracking-tighter">Explorar</h2>
-                <input type="text" id="search-input" oninput="render()" placeholder="Procurar..." class="w-full bg-zinc-900 border border-white/5 rounded-2xl px-6 py-4 outline-none font-bold text-sm">
-                <div id="search-results" class="space-y-3"></div>
+                <input type="text" id="search-input" oninput="render()" placeholder="Procurar matches..." class="w-full bg-zinc-900/50 border border-white/5 rounded-2xl px-6 py-4 outline-none font-bold italic">
+                <div id="search-results" class="space-y-4"></div>
             </div>
 
             <div id="tab-stats" class="tab-content space-y-6">
-                <h2 class="text-2xl font-black italic tracking-tighter">Métricas</h2>
-                <div class="glass-card p-6 space-y-6">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="filter" class="w-4 h-4 text-rose-500"></i>
-                        <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Funil de Conversão</h3>
-                    </div>
-                    <div id="conversion-funnel" class="flex flex-col gap-1.5"></div>
-                    <div class="pt-4 border-t border-white/5 flex justify-between">
-                        <div class="text-center">
-                            <p class="text-[8px] font-black text-zinc-500 uppercase">Eficiência</p>
-                            <p id="funnel-eff" class="text-lg font-black italic tracking-tighter text-rose-500">0%</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[8px] font-black text-zinc-500 uppercase">Qualificação</p>
-                            <p id="funnel-qual" class="text-lg font-black italic tracking-tighter text-blue-500">0%</p>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="text-xl font-black italic tracking-tighter">Métricas & Performance</h2>
+                <div id="conversion-funnel" class="glass-card p-6 flex flex-col gap-2"></div>
                 <div id="status-bars" class="glass-card p-6 space-y-4"></div>
-                <div id="full-alphabet-grid" class="grid grid-cols-4 gap-2"></div>
+                
+                <!-- Grade do Alfabeto Adicionada Novamente -->
+                <div class="glass-card p-6 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="languages" class="w-4 h-4 text-rose-500"></i>
+                        <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição por Inicial</h3>
+                    </div>
+                    <div id="full-alphabet-grid" class="grid grid-cols-4 gap-2"></div>
+                </div>
             </div>
 
             <div id="tab-bookmarks" class="tab-content space-y-6">
-                <h2 class="text-2xl font-black italic tracking-tighter text-rose-500">Destaques</h2>
-                <div id="bookmarks-list" class="space-y-3"></div>
+                <h2 class="text-xl font-black italic tracking-tighter text-rose-500">Destaques</h2>
+                <div id="bookmarks-list" class="space-y-4"></div>
             </div>
 
-            <div id="tab-profile" class="tab-content space-y-8 pt-6">
-                <div class="text-center space-y-4">
-                    <div class="pro-avatar-ring w-24 h-24 mx-auto p-1">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="avatar" class="w-full h-full rounded-full border-4 border-zinc-950 bg-zinc-900">
+            <div id="tab-profile" class="tab-content space-y-6">
+                <div class="glass-card p-6 space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-20 h-20 rounded-3xl overflow-hidden border-2 border-zinc-800">
+                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="Avatar" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="font-black italic text-xl">Don Juan</h3>
+                            <span class="pro-label inline-block mt-2">Pro Account</span>
+                        </div>
                     </div>
-                    <h2 class="text-2xl font-black italic">Configurações</h2>
-                </div>
-                <div class="px-6 space-y-6">
-                    <div class="pt-4 border-t border-white/5">
-                        <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 border border-red-500/10 py-4 rounded-2xl font-black text-xs uppercase active:scale-95">Apagar Todos os Dados</button>
+                    <div class="pt-6 border-t border-white/5">
+                        <p class="text-[10px] text-zinc-500 uppercase font-black italic mb-4">Sincronizado com Google Sheets</p>
+                        <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-black text-xs uppercase active:scale-95 transition-all italic tracking-widest">Apagar Todos os Dados</button>
                     </div>
-                    <p class="text-[8px] text-zinc-500 text-center font-bold uppercase tracking-widest">Versão sem dependência de IA</p>
                 </div>
             </div>
         </main>
@@ -273,363 +228,377 @@
         </nav>
     </div>
 
-    <!-- MODAL DOSSIÊ EDITÁVEL -->
+    <!-- Modal Dossiê -->
     <div id="match-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center p-4 z-[110]">
-        <div class="glass-card w-full max-w-lg p-8 space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
-            <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="glass-card w-full max-w-lg p-8 space-y-8 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
+            <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-zinc-900 rounded-full text-zinc-500"><i data-lucide="x" class="w-5 h-5"></i></button>
             
             <div class="flex flex-col items-center gap-4">
-                <div class="relative group">
-                    <div id="modal-photo-container" class="w-24 h-24 rounded-2xl bg-zinc-900 border-2 border-zinc-800 overflow-hidden flex items-center justify-center">
-                        <img id="modal-photo-img" src="" class="hidden w-full h-full object-cover">
-                        <span id="modal-initial" class="text-4xl font-black italic text-zinc-700 uppercase"></span>
-                    </div>
-                    <label class="absolute -bottom-2 -right-2 bg-pink-600 p-2 rounded-xl cursor-pointer shadow-lg active:scale-90 transition-all">
-                        <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                <div class="w-24 h-24 rounded-3xl bg-zinc-900 border-2 border-zinc-800 overflow-hidden relative">
+                    <img id="modal-photo-img" src="" class="hidden w-full h-full object-cover">
+                    <span id="modal-initial" class="absolute inset-0 flex items-center justify-center text-4xl font-black italic text-zinc-700 uppercase"></span>
+                    <label class="absolute -bottom-1 -right-1 bg-rose-500 p-2 rounded-xl cursor-pointer shadow-lg active:scale-90 transition-all">
+                        <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
                         <input type="file" class="hidden" id="match-photo-input" accept="image/*">
                     </label>
                 </div>
-                <div class="text-center w-full space-y-2">
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="edit-name" placeholder="Nome" oninput="updateModalState()" class="text-center text-xl font-black italic tracking-tighter bg-transparent border-b border-white/5 outline-none w-full">
-                        <input type="number" id="edit-age" placeholder="Idade" oninput="updateModalState()" class="text-center text-xl font-black italic tracking-tighter bg-transparent border-b border-white/5 outline-none w-20">
+                <div class="text-center w-full">
+                    <input type="text" id="edit-name" oninput="updateModalState()" class="text-center text-2xl font-black italic tracking-tighter bg-transparent outline-none w-full text-white" placeholder="NOME">
+                    <div class="flex justify-center items-center gap-2 mt-2">
+                        <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">Idade:</span>
+                        <input type="number" id="edit-age" oninput="updateModalState()" class="w-12 bg-transparent font-black italic text-zinc-300 outline-none">
                     </div>
-                    <input type="text" id="modal-insta-input" class="insta-input" placeholder="@instagram" oninput="updateModalState()">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-zinc-900/40 p-5 rounded-2xl border border-white/5">
-                    <p class="text-[8px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Carreira & Educação</p>
-                    <input type="text" id="edit-profession" placeholder="Profissão" oninput="updateModalState()" class="editable-field mb-1">
-                    <input type="text" id="edit-education" placeholder="Formação" oninput="updateModalState()" class="editable-field">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-card p-5 bg-zinc-900/30">
+                    <p class="text-[9px] font-black text-zinc-600 uppercase mb-3 tracking-widest italic">Carreira</p>
+                    <textarea id="edit-profession" oninput="updateModalState()" class="editable-field h-16 bg-transparent resize-none leading-tight italic" placeholder="Cargo/Profissão..."></textarea>
                 </div>
-                <div class="bg-zinc-900/40 p-5 rounded-2xl border border-white/5">
-                    <p class="text-[8px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Residência</p>
-                    <input type="text" id="edit-neighborhood" placeholder="Bairro" oninput="updateModalState()" class="editable-field mb-1">
-                    <input type="text" id="edit-city" placeholder="Cidade" oninput="updateModalState()" class="editable-field">
+                <div class="glass-card p-5 bg-zinc-900/30">
+                    <p class="text-[9px] font-black text-zinc-600 uppercase mb-3 tracking-widest italic">Residência</p>
+                    <textarea id="edit-neighborhood" oninput="updateModalState()" class="editable-field h-16 bg-transparent resize-none leading-tight italic" placeholder="Bairro..."></textarea>
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 gap-2">
-                <div onclick="toggleBadge('drinks')" id="badge-drinks" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="wine" class="w-4 h-4"></i><span class="text-[7px] font-black uppercase">Bebe</span></div>
-                <div onclick="toggleBadge('kids')" id="badge-kids" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="baby" class="w-4 h-4"></i><span id="label-kids" class="text-[7px] font-black uppercase">Filhos</span></div>
-                <div onclick="toggleBadge('pets')" id="badge-pets" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="dog" class="w-4 h-4"></i><span class="text-[7px] font-black uppercase">Pets</span></div>
-                <div onclick="toggleBadge('smokes')" id="badge-smokes" class="bg-zinc-900/40 p-3 rounded-2xl border border-white/5 flex flex-col items-center gap-2 opacity-20 toggle-btn"><i data-lucide="cigar" class="w-4 h-4"></i><span class="text-[7px] font-black uppercase">Fuma</span></div>
-            </div>
-
-            <div class="bg-zinc-900/40 p-5 rounded-2xl border border-white/5 space-y-3">
-                <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2 italic">
-                    <i data-lucide="sparkles" class="w-3 h-3 text-pink-500"></i> Memória Estratégica
-                </p>
-                <textarea id="edit-topics" placeholder="Anote detalhes importantes aqui..." oninput="updateModalState()" class="w-full h-24 bg-transparent border border-white/5 rounded-xl p-3 text-[10px] text-zinc-400 italic outline-none focus:border-pink-500/30 resize-none"></textarea>
-            </div>
-
-            <div class="flex justify-between items-center bg-zinc-900/60 p-5 rounded-2xl border border-white/5">
-                <div class="text-[9px] font-black uppercase tracking-tighter text-zinc-500 italic">
-                    Salvo em: <span id="modal-date" class="text-zinc-300">---</span>
+            <div class="flex justify-center gap-3">
+                <div onclick="toggleBadge('bebe')" id="badge-bebe" class="badge-circle">
+                    <i data-lucide="wine" class="text-rose-400"></i>
+                    <span class="italic">Bebe</span>
                 </div>
-                <button onclick="saveAndCloseModal()" class="bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black uppercase px-6 py-3 rounded-xl transition-all active:scale-95">Salvar Dossiê</button>
+                <div onclick="toggleBadge('fuma')" id="badge-fuma" class="badge-circle">
+                    <i data-lucide="cigar" class="text-zinc-400"></i>
+                    <span class="italic">Fuma</span>
+                </div>
+                <div onclick="askKidsCount()" id="badge-filhos" class="badge-circle">
+                    <i data-lucide="baby" class="text-blue-400"></i>
+                    <span id="label-filhos" class="italic">Kids</span>
+                </div>
+                <div onclick="toggleBadge('pets')" id="badge-pets" class="badge-circle">
+                    <i data-lucide="dog" class="text-yellow-400"></i>
+                    <span class="italic">Pets</span>
+                </div>
             </div>
+
+            <div class="bg-zinc-900/30 p-5 rounded-2xl border border-white/5 space-y-3">
+                <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">Memória Estratégica</p>
+                <textarea id="edit-topics" oninput="updateModalState()" class="w-full h-24 bg-transparent text-[11px] text-zinc-400 italic outline-none resize-none" placeholder="O que você não pode esquecer..."></textarea>
+            </div>
+
+            <button onclick="saveAndCloseModal()" class="w-full bg-white text-black text-[11px] font-black uppercase py-4 rounded-2xl transition-all active:scale-95 tracking-widest italic">Atualizar Dossiê</button>
         </div>
     </div>
 
     <script>
-        let matches = JSON.parse(localStorage.getItem('mapMatches_vFinal_v6')) || [];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCOuuMGlaTJIl4he-H0gALsRNn40IjM4pmWfNR8vcmCTGf3LYfo40Pt-4dLMz0m4YZ/exec"; 
+        
+        window.matches = [];
         let activeTab = 'home';
         let currentEditingId = null;
 
-        // Função de utilidade para atualizar texto de elementos de forma segura
         function safeSetText(id, text) {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
         }
 
-        const dropzone = document.getElementById('wa-dropzone');
-        const fileInput = document.getElementById('wa-file-input');
-        const statusText = document.getElementById('wa-file-status');
-        const importBtn = document.getElementById('btn-import-wa');
+        function processTextImport() {
+            const inputEl = document.getElementById('wa-text-input');
+            if (!inputEl) return;
+            const content = inputEl.value;
+            if(!content) return;
 
-        if (dropzone) {
-            dropzone.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length) handleFileSelection(e.target.files[0]);
-            });
-        }
+            const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
+            const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
+            const nameMatch = content.match(/(?:\]\s*)([A-Z][a-zà-ú]+)(?:\s*:)/);
 
-        async function handleFileSelection(file) {
-            if (file.name.endsWith('.zip')) {
-                statusText.textContent = "A extrair ZIP...";
-                try {
-                    const zip = new JSZip();
-                    const zipContent = await zip.loadAsync(file);
-                    const txtFile = Object.values(zipContent.files).find(f => f.name.endsWith('.txt'));
-                    if (txtFile) {
-                        const content = await txtFile.async("string");
-                        localStorage.setItem('temp_wa_content', content);
-                        statusText.textContent = `Extraído: ${txtFile.name}`;
-                        importBtn.classList.remove('hidden');
-                    }
-                } catch (err) { statusText.textContent = "Erro ao ler ZIP"; }
-            } else if (file.name.endsWith('.txt')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    localStorage.setItem('temp_wa_content', ev.target.result);
-                    statusText.textContent = `Ficheiro: ${file.name}`;
-                    importBtn.classList.remove('hidden');
-                };
-                reader.readAsText(file);
-            }
-        }
+            const newMatch = {
+                id: Date.now(),
+                nome: nameMatch ? nameMatch[1] : "Novo Registro",
+                idade: ageMatch ? ageMatch[1] : "",
+                status: 'conheci',
+                favorito: false,
+                data: new Date().toLocaleDateString('pt-PT'),
+                instagram: instaMatch ? instaMatch[0] : "",
+                profissao: "",
+                formacao: "",
+                bairro: "",
+                cidade: "",
+                filhos: 0,
+                bebe: false,
+                fuma: false,
+                pets: false,
+                memoria_estrategica: "Importado via texto.",
+                foto: null
+            };
 
-        function processImportLocal() {
-            const content = localStorage.getItem('temp_wa_content') || "";
-            const loader = document.getElementById('import-loader');
-            const btn = document.getElementById('btn-import-wa');
-            
-            loader.classList.remove('hidden');
-            btn.classList.add('hidden');
-
-            setTimeout(() => {
-                const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
-                const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
-                const nameMatch = content.match(/(?:\]\s*)([A-Z][a-zà-ú]+)(?:\s*:)/);
-
-                const data = {
-                    name: nameMatch ? nameMatch[1] : "Novo Match",
-                    age: ageMatch ? ageMatch[1] : null,
-                    instagram: instaMatch ? instaMatch[0] : "",
-                    profession: content.match(/(?:sou|trabalho com|trabalho de)\s+([a-zA-Zà-ú\s]+)/i)?.[1] || "",
-                    neighborhood: content.match(/(?:moro no|moro na|moro em)\s+([a-zA-Zà-ú\s]+)/i)?.[1] || "",
-                    hotTopics: "Informações extraídas automaticamente. Revise o dossiê.",
-                    lifestyle: { drinks: false, smokes: false, has_pets: false },
-                    kidsCount: 0
-                };
-
-                const newMatch = { 
-                    id: Date.now(), 
-                    name: data.name, 
-                    age: data.age, 
-                    status: 'conheci', 
-                    isFavorite: false, 
-                    date: new Date().toLocaleDateString('pt-PT'), 
-                    details: data,
-                    photo: null,
-                    instagram: data.instagram
-                };
-
-                matches.unshift(newMatch);
-                save();
-                loader.classList.add('hidden');
-                statusText.textContent = "Subir ficheiro .txt ou .zip para extração";
-                importBtn.classList.add('hidden');
-                openModal(newMatch.id);
-            }, 800);
+            window.matches.unshift(newMatch);
+            inputEl.value = "";
+            save();
+            openModal(newMatch.id);
         }
 
         function createNewMatch() {
             const id = Date.now();
-            const newM = {
-                id: id,
-                name: "Novo Registro",
-                age: null,
-                status: 'conheci',
-                isFavorite: false,
-                date: new Date().toLocaleDateString('pt-PT'),
-                details: { lifestyle: {}, hotTopics: "" },
-                photo: null,
-                instagram: ""
-            };
-            matches.unshift(newM);
-            save();
-            openModal(id);
+            window.matches.unshift({
+                id: id, nome: "Novo Registro", idade: "", status: 'conheci', favorito: false,
+                data: new Date().toLocaleDateString('pt-PT'), instagram: "", profissao: "",
+                formacao: "", bairro: "", cidade: "", filhos: 0, bebe: false, fuma: false,
+                pets: false, memoria_estrategica: "", foto: null
+            });
+            save(); openModal(id);
         }
 
         function switchTab(t) { 
             activeTab = t; 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${t}`).classList.add('active');
+            const targetTab = document.getElementById(`tab-${t}`);
+            if (targetTab) targetTab.classList.add('active');
+            
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
-            document.getElementById(`nav-${t}`).classList.add('nav-active');
+            const targetNav = document.getElementById(`nav-${t}`);
+            if (targetNav) targetNav.classList.add('nav-active');
+            
             render();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function openModal(id) {
             currentEditingId = id;
-            const m = matches.find(x => x.id === id);
+            const m = window.matches.find(x => x.id === id);
             if (!m) return;
-            const d = m.details || { lifestyle: {} };
             
-            document.getElementById('edit-name').value = m.name || "";
-            document.getElementById('edit-age').value = m.age || "";
-            document.getElementById('modal-insta-input').value = m.instagram || "";
-            document.getElementById('edit-profession').value = d.profession || "";
-            document.getElementById('edit-education').value = d.education || "";
-            document.getElementById('edit-neighborhood').value = d.neighborhood || "";
-            document.getElementById('edit-city').value = d.city || "";
-            document.getElementById('edit-topics').value = d.hotTopics || "";
-            document.getElementById('modal-date').textContent = m.date;
-
-            const updateBadge = (id, active) => {
-                const el = document.getElementById(`badge-${id}`);
-                if (active) el.classList.add('toggle-active');
-                else el.classList.remove('toggle-active');
+            const fields = {
+                'edit-name': m.nome,
+                'edit-age': m.idade,
+                'edit-profession': m.profissao,
+                'edit-neighborhood': m.bairro,
+                'edit-topics': m.memoria_estrategica
             };
-            updateBadge('drinks', d.lifestyle?.drinks);
-            updateBadge('smokes', d.lifestyle?.smokes);
-            updateBadge('pets', d.lifestyle?.has_pets);
-            updateBadge('kids', d.kidsCount > 0);
+
+            for (let id in fields) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = fields[id] || "";
+                    else el.textContent = fields[id] || "";
+                }
+            }
+
+            const updateBadgeUI = (badgeId, active, label = null) => {
+                const el = document.getElementById(`badge-${badgeId}`);
+                if (el) {
+                    if (active) el.classList.add('active'); else el.classList.remove('active');
+                    if(label) {
+                        const labelEl = document.getElementById(`label-${badgeId}`);
+                        if(labelEl) labelEl.textContent = label;
+                    }
+                }
+            };
+
+            updateBadgeUI('bebe', m.bebe);
+            updateBadgeUI('fuma', m.fuma);
+            updateBadgeUI('pets', m.pets);
+            updateBadgeUI('filhos', m.filhos > 0, m.filhos > 0 ? `Kids (${m.filhos})` : 'Kids');
 
             const photoImg = document.getElementById('modal-photo-img');
             const initialSpan = document.getElementById('modal-initial');
-            const avatarSrc = getAvatarSource(m);
-            if (avatarSrc) {
-                photoImg.src = avatarSrc; photoImg.classList.remove('hidden'); initialSpan.classList.add('hidden');
-                photoImg.onerror = () => { photoImg.classList.add('hidden'); initialSpan.classList.remove('hidden'); };
-            } else { photoImg.classList.add('hidden'); initialSpan.classList.remove('hidden'); initialSpan.textContent = m.name[0]; }
+            if (photoImg && initialSpan) {
+                if (m.foto) {
+                    photoImg.src = m.foto; photoImg.classList.remove('hidden'); initialSpan.classList.add('hidden');
+                } else { 
+                    photoImg.classList.add('hidden'); 
+                    initialSpan.classList.remove('hidden'); 
+                    initialSpan.textContent = (m.nome || "?")[0]; 
+                }
+            }
 
-            document.getElementById('match-modal').classList.remove('hidden');
+            const modal = document.getElementById('match-modal');
+            if (modal) modal.classList.remove('hidden');
             lucide.createIcons();
         }
 
         function toggleBadge(key) {
-            const m = matches.find(x => x.id === currentEditingId);
+            const m = window.matches.find(x => x.id === currentEditingId);
             if (!m) return;
-            if (!m.details.lifestyle) m.details.lifestyle = {};
-            
-            if (key === 'kids') m.details.kidsCount = m.details.kidsCount > 0 ? 0 : 1;
-            else if (key === 'pets') m.details.lifestyle.has_pets = !m.details.lifestyle.has_pets;
-            else m.details.lifestyle[key] = !m.details.lifestyle[key];
-            
+            m[key] = !m[key];
             openModal(currentEditingId);
             save();
         }
 
+        function askKidsCount() {
+            const count = prompt("Quantos filhos?", "1");
+            if(count !== null) {
+                const m = window.matches.find(x => x.id === currentEditingId);
+                if (m) {
+                    m.filhos = parseInt(count) || 0;
+                    openModal(currentEditingId);
+                    save();
+                }
+            }
+        }
+
         function updateModalState() {
-            const m = matches.find(x => x.id === currentEditingId);
+            const m = window.matches.find(x => x.id === currentEditingId);
             if (!m) return;
-            m.name = document.getElementById('edit-name').value;
-            m.age = document.getElementById('edit-age').value;
-            m.instagram = document.getElementById('modal-insta-input').value;
-            m.details.profession = document.getElementById('edit-profession').value;
-            m.details.education = document.getElementById('edit-education').value;
-            m.details.neighborhood = document.getElementById('edit-neighborhood').value;
-            m.details.city = document.getElementById('edit-city').value;
-            m.details.hotTopics = document.getElementById('edit-topics').value;
+            const nameEl = document.getElementById('edit-name');
+            const ageEl = document.getElementById('edit-age');
+            const profEl = document.getElementById('edit-profession');
+            const neighEl = document.getElementById('edit-neighborhood');
+            const topEl = document.getElementById('edit-topics');
+
+            if (nameEl) m.nome = nameEl.value;
+            if (ageEl) m.idade = ageEl.value;
+            if (profEl) m.profissao = profEl.value;
+            if (neighEl) m.bairro = neighEl.value;
+            if (topEl) m.memoria_estrategica = topEl.value;
         }
 
         function saveAndCloseModal() {
-            updateModalState();
-            save();
-            closeModal();
+            updateModalState(); save(); closeModal();
         }
 
-        function closeModal() { document.getElementById('match-modal').classList.add('hidden'); render(); }
-        function save() { localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(matches)); }
-
-        function getAvatarSource(m) {
-            if (m.photo) return m.photo;
-            if (m.instagram) {
-                const handle = m.instagram.replace('@', '').trim();
-                if (handle) return `https://unavatar.io/instagram/${handle}`;
+        function closeModal() { 
+            const modal = document.getElementById('match-modal');
+            if (modal) modal.classList.add('hidden'); 
+            render(); 
+        }
+        
+        async function save() { 
+            localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(window.matches));
+            if(SCRIPT_URL.includes("URL_DO_SEU")) return;
+            
+            const status = document.getElementById('cloud-status');
+            if (status) {
+                status.classList.remove('bg-zinc-700', 'bg-green-500', 'bg-red-500');
+                status.classList.add('bg-blue-500', 'animate-pulse');
             }
-            return null;
+
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(window.matches) });
+                if (status) {
+                    status.classList.remove('animate-pulse');
+                    status.classList.replace('bg-blue-500', 'bg-green-500');
+                    setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
+                }
+            } catch(e) { 
+                if (status) {
+                    status.classList.remove('animate-pulse');
+                    status.classList.replace('bg-blue-500', 'bg-red-500'); 
+                }
+            }
+        }
+
+        async function load() {
+            const local = localStorage.getItem('mapMatches_vFinal_v6');
+            if(local) window.matches = JSON.parse(local);
+            
+            if(!SCRIPT_URL.includes("URL_DO_SEU")) {
+                const status = document.getElementById('cloud-status');
+                if (status) status.classList.add('animate-pulse');
+                try {
+                    const resp = await fetch(SCRIPT_URL);
+                    const data = await resp.json();
+                    if(data && data.length > 0) window.matches = data;
+                    if (status) {
+                        status.classList.replace('bg-zinc-700', 'bg-green-500');
+                        setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
+                    }
+                } catch(e) { 
+                    if (status) status.classList.replace('bg-zinc-700', 'bg-red-500'); 
+                }
+                if (status) status.classList.remove('animate-pulse');
+            }
+            render();
         }
 
         function render() {
             const stats = { conheci: 0, sai: 0, fiquei: 0, transei: 0 };
-            matches.forEach(m => stats[m.status]++);
-            const total = matches.length;
-            safeSetText('global-score', (total * 5 + stats.transei * 85).toFixed(2));
-
-            const circles = document.getElementById('pro-accounts-scroll');
-            if (circles) {
-                circles.innerHTML = matches.slice(0, 8).map(m => {
-                    const src = getAvatarSource(m);
-                    return `<div class="flex flex-col items-center gap-2 shrink-0 active:scale-95 transition-all" onclick="openModal(${m.id})">
-                        <div class="pro-avatar-ring w-16 h-16 p-0.5">
-                            <div class="w-full h-full rounded-full bg-zinc-900 border-2 border-zinc-950 flex items-center justify-center font-black text-xl italic overflow-hidden">
-                                ${src ? `<img src="${src}" class="w-full h-full object-cover">` : m.name[0]}
-                            </div>
-                        </div>
-                        <span class="text-[9px] font-black text-zinc-500 uppercase tracking-tighter italic truncate w-14 text-center">${m.name.split(' ')[0]}</span>
-                    </div>`
-                }).join('');
-            }
+            window.matches.forEach(m => stats[m.status]++);
+            safeSetText('global-score', (window.matches.length * 5 + stats.transei * 85).toFixed(2));
 
             let containerId = activeTab === 'home' ? 'recent-list' : activeTab === 'search' ? 'search-results' : activeTab === 'bookmarks' ? 'bookmarks-list' : null;
             const container = containerId ? document.getElementById(containerId) : null;
             if (container) {
-                let f = activeTab === 'search' ? matches.filter(x => x.name.toLowerCase().includes(document.getElementById('search-input').value.toLowerCase())) :
-                        activeTab === 'bookmarks' ? matches.filter(x => x.isFavorite) : matches;
-                container.innerHTML = f.map(m => {
-                    const src = getAvatarSource(m);
-                    return `<div class="glass-card p-5 flex items-center justify-between border-l-4 status-${m.status} active:scale-95 transition-all" onclick="openModal(${m.id})">
-                        <div class="flex items-center gap-4 overflow-hidden">
-                            <div class="w-12 h-12 rounded-2xl bg-zinc-900 shrink-0 flex items-center justify-center font-black text-xs uppercase border border-white/5 overflow-hidden">
-                                ${src ? `<img src="${src}" class="w-full h-full object-cover">` : m.name[0]}
+                const searchEl = document.getElementById('search-input');
+                let f = activeTab === 'search' && searchEl ? window.matches.filter(x => x.nome.toLowerCase().includes(searchEl.value.toLowerCase())) :
+                        activeTab === 'bookmarks' ? window.matches.filter(x => x.favorito) : window.matches;
+                container.innerHTML = f.map(m => `
+                    <div class="glass-card p-5 flex items-center justify-between border-l-4 status-${m.status}" onclick="openModal(${m.id})">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center font-black italic border border-white/5 overflow-hidden uppercase">
+                                ${m.foto ? `<img src="${m.foto}" class="w-full h-full object-cover">` : (m.nome || "?")[0]}
                             </div>
-                            <div class="truncate">
-                                <h3 class="font-black text-zinc-100 text-sm tracking-tighter italic truncate">${m.name}</h3>
-                                <p class="text-[7px] text-zinc-600 font-black uppercase tracking-widest mt-0.5">${m.date}</p>
+                            <div>
+                                <h3 class="font-black italic text-sm tracking-tighter">${m.nome}</h3>
+                                <p class="text-[8px] text-zinc-600 font-black uppercase tracking-widest italic">${m.data}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-                             <button onclick="toggleFavorite(${m.id}); event.stopPropagation();" class="p-2.5 ${m.isFavorite ? 'text-rose-500' : 'text-zinc-700'} transition-transform"><i data-lucide="bookmark" class="w-5 h-5 ${m.isFavorite ? 'fill-current' : ''}"></i></button>
-                             <select onchange="updateStatus(${m.id}, this.value); event.stopPropagation();" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase outline-none border border-white/5 text-zinc-400">
+                        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                             <button onclick="toggleFavorite(${m.id})" class="p-2 ${m.favorito ? 'text-rose-500' : 'text-zinc-700'}"><i data-lucide="bookmark" class="w-5 h-5 ${m.favorito ? 'fill-current' : ''}"></i></button>
+                             <select onchange="updateStatus(${m.id}, this.value)" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase border border-white/5 text-zinc-400 outline-none italic">
                                 <option value="conheci" ${m.status === 'conheci' ? 'selected' : ''}>Conheci</option>
                                 <option value="sai" ${m.status === 'sai' ? 'selected' : ''}>Saí</option>
                                 <option value="fiquei" ${m.status === 'fiquei' ? 'selected' : ''}>Fiquei</option>
                                 <option value="transei" ${m.status === 'transei' ? 'selected' : ''}>Transei</option>
                              </select>
                         </div>
-                    </div>`
-                }).join('');
+                    </div>`).join('');
             }
 
             if(activeTab === 'stats') {
+                const total = window.matches.length;
                 const funnelContainer = document.getElementById('conversion-funnel');
                 if (funnelContainer) {
-                    const steps = [
-                        { label: 'Conheci', val: total, color: '#3b82f6' },
-                        { label: 'Saíram', val: stats.sai + stats.fiquei + stats.transei, color: '#a855f7' },
-                        { label: 'Fiquei', val: stats.fiquei + stats.transei, color: '#ec4899' },
-                        { label: 'Transei', val: stats.transei, color: '#ef4444' }
-                    ];
-                    funnelContainer.innerHTML = steps.map(s => {
+                    const steps = [{ label: 'Conheci', val: total, color: '#3b82f6' }, { label: 'Saíram', val: stats.sai + stats.fiquei + stats.transei, color: '#a855f7' }, { label: 'Fiquei', val: stats.fiquei + stats.transei, color: '#ec4899' }, { label: 'Transei', val: stats.transei, color: '#ef4444' }];
+                    funnelContainer.innerHTML = `<h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic mb-2">Funil de Conversão</h3>` + steps.map(s => {
                         const width = total > 0 ? Math.max((s.val / total) * 100, 15) : 0;
-                        return `<div class="w-full flex flex-col gap-1 items-center">
-                            <div class="funnel-step rounded-xl" style="width: ${width}%; background-color: ${s.color}20; border: 1px solid ${s.color}40">
-                                <span style="color: ${s.color}">${s.val}</span>
-                            </div>
-                            <span class="text-[7px] font-black text-zinc-600 uppercase tracking-tighter">${s.label}</span>
-                        </div>`;
+                        return `<div class="w-full flex flex-col gap-1 items-center"><div class="funnel-step rounded-xl" style="width: ${width}%; background-color: ${s.color}20; border: 1px solid ${s.color}40"><span style="color: ${s.color}">${s.val}</span></div><span class="text-[7px] font-black text-zinc-600 uppercase tracking-tighter italic">${s.label}</span></div>`;
                     }).join('');
-                    safeSetText('funnel-eff', `${total > 0 ? ((stats.transei / total) * 100).toFixed(0) : 0}%`);
-                    safeSetText('funnel-qual', `${total > 0 ? (((stats.sai + stats.fiquei + stats.transei) / total) * 100).toFixed(0) : 0}%`);
                 }
                 const b = document.getElementById('status-bars');
                 const colors = { conheci: '#3b82f6', sai: '#a855f7', fiquei: '#ec4899', transei: '#ef4444' };
-                if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div>
-                        <div class="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-white/5"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${colors[k]}"></div></div>
-                    </div>`).join('');
-                const grid = document.getElementById('full-alphabet-grid');
-                if (grid) {
-                    const counts = {}; matches.forEach(m => { if(m.name) { const l = m.name[0].toUpperCase(); counts[l] = (counts[l] || 0) + 1; } });
-                    grid.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => `<div class="p-3 rounded-2xl border ${counts[l] ? 'bg-zinc-800 border-rose-500/20 text-white' : 'bg-zinc-900/40 border-white/5 text-zinc-800'} flex flex-col items-center"><span class="text-[10px] font-black italic">${l}</span><span class="text-[8px] font-bold mt-0.5">${counts[l] || 0}</span></div>`).join('');
+                if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `<div class="space-y-1"><div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div><div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${colors[k]}"></div></div></div>`).join('');
+                
+                // Lógica de Alfabeto
+                const alphabetGrid = document.getElementById('full-alphabet-grid');
+                if (alphabetGrid) {
+                    const counts = {};
+                    window.matches.forEach(m => {
+                        if(m.nome) {
+                            const initial = m.nome[0].toUpperCase();
+                            counts[initial] = (counts[initial] || 0) + 1;
+                        }
+                    });
+                    alphabetGrid.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => {
+                        const count = counts[l] || 0;
+                        return `<div class="p-3 rounded-2xl border ${count ? 'bg-zinc-800 border-rose-500/20 text-white' : 'bg-zinc-900/40 border-white/5 text-zinc-800'} flex flex-col items-center">
+                            <span class="text-[11px] font-black italic">${l}</span>
+                            <span class="text-[8px] font-bold mt-0.5">${count}</span>
+                        </div>`;
+                    }).join('');
                 }
             }
             lucide.createIcons();
         }
 
-        function toggleFavorite(id) { matches = matches.map(m => m.id === id ? { ...m, isFavorite: !m.isFavorite } : m); save(); render(); }
-        function updateStatus(id, s) { matches = matches.map(m => m.id === id ? { ...m, status: s } : m); save(); render(); }
-        function confirmReset() { if(confirm("Apagar todos os registros permanentemente?")) { matches = []; save(); switchTab('home'); } }
+        function toggleFavorite(id) { window.matches = window.matches.map(m => m.id === id ? { ...m, favorito: !m.favorito } : m); save(); render(); }
+        function updateStatus(id, s) { window.matches = window.matches.map(m => m.id === id ? { ...m, status: s } : m); save(); render(); }
+        function confirmReset() { if(confirm("Apagar tudo? Isso limpará a planilha e o local.")) { window.matches = []; save(); render(); } }
 
-        window.onload = () => { render(); };
+        const photoInput = document.getElementById('match-photo-input');
+        if (photoInput) {
+            photoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    window.matches = window.matches.map(m => m.id === currentEditingId ? { ...m, foto: ev.target.result } : m);
+                    save(); openModal(currentEditingId);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.onload = load;
     </script>
 </body>
 </html>
