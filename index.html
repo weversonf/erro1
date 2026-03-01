@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAP v07 - Full Edition</title>
+    <title>MAP v08 - Full Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -268,9 +268,11 @@
                             <span class="pro-label inline-block mt-2">Pro Account</span>
                         </div>
                     </div>
-                    <div class="pt-6 border-t border-white/5">
-                        <p class="text-[10px] text-zinc-500 uppercase font-black italic mb-4">Sincronizado com Google Sheets</p>
-                        <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-black text-xs uppercase active:scale-95 transition-all italic tracking-widest">Apagar Todos os Dados</button>
+                    <div class="pt-6 border-t border-white/5 space-y-3">
+                        <p class="text-[10px] text-zinc-500 uppercase font-black italic mb-2">Sincronizado com Google Sheets</p>
+                        <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-black text-xs uppercase active:scale-95 transition-all italic tracking-widest border border-red-500/20">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 inline-block mr-2"></i> Apagar Todos os Dados
+                        </button>
                     </div>
                 </div>
             </div>
@@ -289,7 +291,13 @@
     <!-- Modal Dossiê Full -->
     <div id="match-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center p-4 z-[110]">
         <div class="glass-card w-full max-w-lg p-8 space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
-            <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-zinc-900 rounded-full text-zinc-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="absolute top-6 right-6 flex items-center gap-2">
+                <!-- Botão de exclusão dentro do modal -->
+                <button id="modal-delete-btn" class="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-all">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+                <button onclick="closeModal()" class="p-2 bg-zinc-900 rounded-full text-zinc-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
             
             <div class="flex flex-col items-center gap-4">
                 <div class="w-24 h-24 rounded-3xl bg-zinc-900 border-2 border-zinc-800 overflow-hidden relative">
@@ -532,8 +540,21 @@
                 }
             }
 
+            // Atribuir função de deletar ao botão do modal
+            document.getElementById('modal-delete-btn').onclick = () => deleteMatch(m.id);
+
             document.getElementById('match-modal').classList.remove('hidden');
             lucide.createIcons();
+        }
+
+        // Função para deletar um único match
+        function deleteMatch(id) {
+            if (confirm("Tens a certeza que queres eliminar permanentemente este registo?")) {
+                window.matches = window.matches.filter(m => m.id !== id);
+                closeModal();
+                save();
+                render();
+            }
         }
 
         function toggleBadge(key) {
@@ -645,6 +666,12 @@
                         </div>
                         <div class="flex items-center gap-2" onclick="event.stopPropagation()">
                              <button onclick="toggleFavorite(${m.id})" class="p-2 ${m.favorito ? 'text-rose-500' : 'text-zinc-700'}"><i data-lucide="bookmark" class="w-5 h-5 ${m.favorito ? 'fill-current' : ''}"></i></button>
+                             
+                             <!-- Botão de apagar individual na lista -->
+                             <button onclick="deleteMatch(${m.id})" class="p-2 text-zinc-700 hover:text-red-500 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                             </button>
+
                              <select onchange="updateStatus(${m.id}, this.value)" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase border border-white/5 text-zinc-400 outline-none italic">
                                 <option value="conheci" ${m.status === 'conheci' ? 'selected' : ''}>Conheci</option>
                                 <option value="sai" ${m.status === 'sai' ? 'selected' : ''}>Saí</option>
@@ -686,7 +713,15 @@
 
         function toggleFavorite(id) { window.matches = window.matches.map(m => m.id === id ? { ...m, favorito: !m.favorito } : m); save(); render(); }
         function updateStatus(id, s) { window.matches = window.matches.map(m => m.id === id ? { ...m, status: s } : m); save(); render(); }
-        function confirmReset() { if(confirm("Apagar tudo? Isso limpará a planilha e o local.")) { window.matches = []; save(); render(); } }
+        
+        // Função para apagar tudo (já estava no código, apenas reforcei o aviso)
+        function confirmReset() { 
+            if(confirm("ATENÇÃO: Desejas apagar TODOS os registos? Esta ação limpará a planilha e o armazenamento local permanentemente.")) { 
+                window.matches = []; 
+                save(); 
+                render(); 
+            } 
+        }
 
         document.getElementById('match-photo-input').addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
