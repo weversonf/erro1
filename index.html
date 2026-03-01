@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Match Analytics Pro v05</title>
+    <title>MAP v06</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,6 +23,46 @@
             margin: 0;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Lock Screen Styles */
+        #lock-screen {
+            position: fixed;
+            inset: 0;
+            background: #000000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+        }
+
+        #lock-screen.unlocked {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .lock-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-align: center;
+            font-weight: 700;
+            outline: none;
+            width: 280px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+        }
+
+        .lock-input:focus {
+            border-color: var(--accent-pink);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.1);
         }
 
         .glass-card { 
@@ -80,12 +120,6 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        .pro-avatar-ring {
-            padding: 2px;
-            background: linear-gradient(to tr, #f43f5e, #fbbf24);
-            border-radius: 999px;
-        }
-
         .modal-overlay {
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(12px);
@@ -137,6 +171,20 @@
 </head>
 <body class="no-scrollbar">
 
+    <!-- Mascara / Lock Screen -->
+    <div id="lock-screen">
+        <div class="text-center space-y-8">
+            <div class="space-y-2">
+                <span class="text-4xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] italic">Dossiê System</p>
+            </div>
+            <div class="space-y-4">
+                <input type="password" id="pass-trigger" placeholder="Type command..." class="lock-input italic uppercase" onkeypress="handleLockPress(event)">
+                <button onclick="checkLock()" class="block mx-auto text-[9px] font-black text-zinc-600 uppercase tracking-widest hover:text-rose-500 transition-colors">Acessar Ranking</button>
+            </div>
+        </div>
+    </div>
+
     <div id="real-app" class="min-h-screen pb-40">
         <header class="p-6 flex justify-between items-center max-w-lg mx-auto">
             <div class="flex items-center gap-3">
@@ -160,14 +208,19 @@
                             <i data-lucide="zap" class="w-4 h-4 text-rose-500 fill-current"></i>
                             <h3 class="text-xs font-black text-zinc-100 uppercase tracking-widest italic">WA AI Import</h3>
                         </div>
-                        <button onclick="createNewMatch()" class="text-[9px] font-black bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-white/10 transition-colors italic">Novo Manual</button>
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('multi-file-input').click()" class="text-[9px] font-black bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-white/10 transition-colors italic">Subir TXTs</button>
+                            <button onclick="createNewMatch()" class="text-[9px] font-black bg-rose-500/10 border border-rose-500/20 text-rose-500 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-rose-500/20 transition-colors italic">Novo Manual</button>
+                        </div>
                     </div>
                     
+                    <input type="file" id="multi-file-input" class="hidden" accept=".txt" multiple onchange="handleMultiFileUpload(this)">
+
                     <textarea id="wa-text-input" placeholder="Cole trechos da conversa aqui..." 
                         class="w-full h-32 bg-zinc-900/50 rounded-2xl p-4 text-sm text-zinc-400 outline-none border border-white/5 focus:border-rose-500/20 transition-all resize-none mb-4 italic"></textarea>
                     
                     <button onclick="processTextImport()" class="w-full bg-zinc-900/80 hover:bg-zinc-800 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 border border-white/5 transition-all italic">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i> Analisar Dossiê
+                        <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i> Analisar Texto Colado
                     </button>
                 </section>
 
@@ -184,7 +237,6 @@
                 <div id="conversion-funnel" class="glass-card p-6 flex flex-col gap-2"></div>
                 <div id="status-bars" class="glass-card p-6 space-y-4"></div>
                 
-                <!-- Grade do Alfabeto Adicionada Novamente -->
                 <div class="glass-card p-6 space-y-4">
                     <div class="flex items-center gap-2">
                         <i data-lucide="languages" class="w-4 h-4 text-rose-500"></i>
@@ -297,23 +349,34 @@
         let activeTab = 'home';
         let currentEditingId = null;
 
+        // --- Sistema de Bloqueio ---
+        function handleLockPress(e) {
+            if (e.key === 'Enter') checkLock();
+        }
+
+        function checkLock() {
+            const input = document.getElementById('pass-trigger');
+            if (input.value.toLowerCase() === 'open ranking') {
+                document.getElementById('lock-screen').classList.add('unlocked');
+                input.value = "";
+            } else {
+                input.style.borderColor = "#ef4444";
+                setTimeout(() => input.style.borderColor = "rgba(255, 255, 255, 0.1)", 1000);
+            }
+        }
+
         function safeSetText(id, text) {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
         }
 
-        function processTextImport() {
-            const inputEl = document.getElementById('wa-text-input');
-            if (!inputEl) return;
-            const content = inputEl.value;
-            if(!content) return;
-
+        function extractFromText(content) {
             const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
             const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
             const nameMatch = content.match(/(?:\]\s*)([A-Z][a-zà-ú]+)(?:\s*:)/);
 
-            const newMatch = {
-                id: Date.now(),
+            return {
+                id: Date.now() + Math.floor(Math.random() * 1000),
                 nome: nameMatch ? nameMatch[1] : "Novo Registro",
                 idade: ageMatch ? ageMatch[1] : "",
                 status: 'conheci',
@@ -328,14 +391,43 @@
                 bebe: false,
                 fuma: false,
                 pets: false,
-                memoria_estrategica: "Importado via texto.",
+                memoria_estrategica: "Importado via robô.",
                 foto: null
             };
+        }
 
+        function processTextImport() {
+            const inputEl = document.getElementById('wa-text-input');
+            if (!inputEl) return;
+            const content = inputEl.value;
+            if(!content) return;
+
+            const newMatch = extractFromText(content);
             window.matches.unshift(newMatch);
             inputEl.value = "";
             save();
             openModal(newMatch.id);
+        }
+
+        async function handleMultiFileUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+            
+            const status = document.getElementById('cloud-status');
+            if (status) {
+                status.classList.remove('bg-zinc-700', 'bg-green-500', 'bg-red-500');
+                status.classList.add('bg-blue-500', 'animate-pulse');
+            }
+
+            for (let i = 0; i < input.files.length; i++) {
+                const file = input.files[i];
+                const text = await file.text();
+                const newMatch = extractFromText(text);
+                window.matches.unshift(newMatch);
+            }
+
+            input.value = ""; 
+            await save();
+            render();
         }
 
         function createNewMatch() {
@@ -465,7 +557,6 @@
         
         async function save() { 
             localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(window.matches));
-            if(SCRIPT_URL.includes("URL_DO_SEU")) return;
             
             const status = document.getElementById('cloud-status');
             if (status) {
@@ -474,13 +565,18 @@
             }
 
             try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(window.matches) });
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(window.matches)
+                });
+                
                 if (status) {
                     status.classList.remove('animate-pulse');
                     status.classList.replace('bg-blue-500', 'bg-green-500');
                     setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
                 }
             } catch(e) { 
+                console.error("Erro ao salvar:", e);
                 if (status) {
                     status.classList.remove('animate-pulse');
                     status.classList.replace('bg-blue-500', 'bg-red-500'); 
@@ -492,22 +588,20 @@
             const local = localStorage.getItem('mapMatches_vFinal_v6');
             if(local) window.matches = JSON.parse(local);
             
-            if(!SCRIPT_URL.includes("URL_DO_SEU")) {
-                const status = document.getElementById('cloud-status');
-                if (status) status.classList.add('animate-pulse');
-                try {
-                    const resp = await fetch(SCRIPT_URL);
-                    const data = await resp.json();
-                    if(data && data.length > 0) window.matches = data;
-                    if (status) {
-                        status.classList.replace('bg-zinc-700', 'bg-green-500');
-                        setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
-                    }
-                } catch(e) { 
-                    if (status) status.classList.replace('bg-zinc-700', 'bg-red-500'); 
+            const status = document.getElementById('cloud-status');
+            if (status) status.classList.add('animate-pulse');
+            try {
+                const resp = await fetch(SCRIPT_URL);
+                const data = await resp.json();
+                if(data && data.length > 0) window.matches = data;
+                if (status) {
+                    status.classList.replace('bg-zinc-700', 'bg-green-500');
+                    setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
                 }
-                if (status) status.classList.remove('animate-pulse');
+            } catch(e) { 
+                if (status) status.classList.replace('bg-zinc-700', 'bg-red-500'); 
             }
+            if (status) status.classList.remove('animate-pulse');
             render();
         }
 
@@ -559,7 +653,6 @@
                 const colors = { conheci: '#3b82f6', sai: '#a855f7', fiquei: '#ec4899', transei: '#ef4444' };
                 if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `<div class="space-y-1"><div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div><div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${colors[k]}"></div></div></div>`).join('');
                 
-                // Lógica de Alfabeto
                 const alphabetGrid = document.getElementById('full-alphabet-grid');
                 if (alphabetGrid) {
                     const counts = {};
