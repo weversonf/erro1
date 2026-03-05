@@ -172,25 +172,24 @@
 </head>
 <body class="no-scrollbar">
 
-    <!-- Mascara / Lock Screen -->
-<div id="lock-screen">
-    <div class="text-center space-y-8">
-        <div class="space-y-2">
-            <span class="text-4xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
-            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] italic">Dossiê System</p>
-        </div>
-        
-        <div class="flex flex-col gap-3">
-            <input type="text" id="login-user" placeholder="USUÁRIO" class="lock-input italic uppercase">
-            <input type="password" id="login-pass" placeholder="SENHA" class="lock-input italic uppercase">
+    <div id="lock-screen">
+        <div class="text-center space-y-8">
+            <div class="space-y-2">
+                <span class="text-4xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] italic">Dossiê System</p>
+            </div>
             
-            <button onclick="attemptLogin()" id="btn-login" class="w-full bg-rose-500 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all italic mt-4">
-                Acessar Ambiente
-            </button>
-            <p id="error-msg" class="text-rose-500 text-[10px] font-bold uppercase hidden">Credenciais Inválidas</p>
+            <div class="flex flex-col gap-3">
+                <input type="text" id="login-user" placeholder="USUÁRIO" class="lock-input italic uppercase" onkeypress="handleLockPress(event)">
+                <input type="password" id="login-pass" placeholder="SENHA" class="lock-input italic uppercase" onkeypress="handleLockPress(event)">
+                
+                <button onclick="attemptLogin()" id="btn-login" class="w-full bg-rose-500 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all italic mt-4 active:scale-95">
+                    Acessar Ambiente
+                </button>
+                <p id="error-msg" class="text-rose-500 text-[10px] font-bold uppercase hidden italic tracking-widest">Credenciais Inválidas</p>
+            </div>
         </div>
     </div>
-</div>
 
     <div id="real-app" class="min-h-screen pb-40">
         <header class="p-6 flex justify-between items-center max-w-lg mx-auto">
@@ -208,7 +207,6 @@
         </header>
 
         <main class="max-w-lg mx-auto px-6 space-y-6">
-            <!-- ABA HOME -->
             <div id="tab-home" class="tab-content active space-y-6">
                 <section class="glass-card p-6 border border-white/5">
                     <div class="flex items-center justify-between mb-4">
@@ -235,13 +233,11 @@
                 <div id="recent-list" class="space-y-4"></div>
             </div>
 
-            <!-- ABA BUSCA -->
             <div id="tab-search" class="tab-content space-y-6">
                 <input type="text" id="search-input" oninput="render()" placeholder="Procurar matches..." class="w-full bg-zinc-900/50 border border-white/5 rounded-2xl px-6 py-4 outline-none font-bold italic">
                 <div id="search-results" class="space-y-4"></div>
             </div>
 
-            <!-- ABA MÉTRICAS -->
             <div id="tab-stats" class="tab-content space-y-6">
                 <h2 class="text-xl font-black italic tracking-tighter">Métricas & Performance</h2>
                 <div id="conversion-funnel" class="glass-card p-6 flex flex-col gap-2"></div>
@@ -256,13 +252,11 @@
                 </div>
             </div>
 
-            <!-- ABA FAVORITOS -->
             <div id="tab-bookmarks" class="tab-content space-y-6">
                 <h2 class="text-xl font-black italic tracking-tighter text-rose-500">Destaques</h2>
                 <div id="bookmarks-list" class="space-y-4"></div>
             </div>
 
-            <!-- ABA PERFIL -->
             <div id="tab-profile" class="tab-content space-y-6">
                 <div class="glass-card p-6 space-y-6 text-center">
                     <div class="flex flex-col items-center gap-3">
@@ -270,12 +264,17 @@
                              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="Avatar" class="w-full h-full object-cover">
                         </div>
                         <div>
-                            <h3 class="font-black italic text-xl">Don Juan</h3>
+                            <h3 id="display-user-name" class="font-black italic text-xl">Carregando...</h3>
                             <span class="pro-label inline-block mt-2">Pro Account</span>
                         </div>
                     </div>
                     <div class="pt-6 border-t border-white/5 space-y-3">
+                        <button onclick="handleLogout()" class="w-full bg-zinc-800 text-white py-4 rounded-2xl font-black text-xs uppercase active:scale-95 transition-all italic tracking-widest border border-white/10 mb-2">
+                            <i data-lucide="log-out" class="w-4 h-4 inline-block mr-2"></i> Encerrar Sessão
+                        </button>
+
                         <p class="text-[10px] text-zinc-500 uppercase font-black italic mb-2">Sincronizado com Google Sheets</p>
+                        
                         <button onclick="confirmReset()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-black text-xs uppercase active:scale-95 transition-all italic tracking-widest border border-red-500/20">
                             <i data-lucide="alert-triangle" class="w-4 h-4 inline-block mr-2"></i> Apagar Todos os Dados
                         </button>
@@ -294,11 +293,9 @@
         </nav>
     </div>
 
-    <!-- Modal Dossiê Full -->
     <div id="match-modal" class="fixed inset-0 modal-overlay hidden flex items-center justify-center p-4 z-[110]">
         <div class="glass-card w-full max-w-lg p-8 space-y-6 relative max-h-[90vh] overflow-y-auto no-scrollbar border-t border-white/10">
             <div class="absolute top-6 right-6 flex items-center gap-2">
-                <!-- Botão de exclusão dentro do modal -->
                 <button id="modal-delete-btn" class="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-all">
                     <i data-lucide="trash-2" class="w-5 h-5"></i>
                 </button>
@@ -323,7 +320,6 @@
                 </div>
             </div>
 
-            <!-- Dados Complementares -->
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="glass-card p-4 bg-zinc-900/30">
@@ -361,7 +357,6 @@
                 </div>
             </div>
 
-            <!-- Badges -->
             <div class="flex justify-center gap-3">
                 <div onclick="toggleBadge('bebe')" id="badge-bebe" class="badge-circle">
                     <i data-lucide="wine" class="text-rose-400"></i>
@@ -397,8 +392,9 @@
     let activeTab = 'home';
     let currentEditingId = null;
     let userToken = localStorage.getItem('map_token') || null;
+    let userName = localStorage.getItem('map_user_name') || "Usuário";
 
-    // --- Sistema de Autenticação Real ---
+    // --- Sistema de Autenticação ---
     async function attemptLogin() {
         const user = document.getElementById('login-user').value;
         const pass = document.getElementById('login-pass').value;
@@ -420,7 +416,11 @@
 
             if (result.success) {
                 userToken = result.userToken;
+                userName = result.userName;
                 localStorage.setItem('map_token', userToken);
+                localStorage.setItem('map_user_name', userName);
+                
+                document.getElementById('display-user-name').textContent = userName;
                 document.getElementById('lock-screen').classList.add('unlocked');
                 load(); 
             } else {
@@ -435,7 +435,14 @@
         }
     }
 
-    // Adaptador para manter a função checkLock original se preferir usar o comando "open ranking"
+    function handleLogout() {
+        if (confirm("Desejas encerrar a sessão?")) {
+            localStorage.removeItem('map_token');
+            localStorage.removeItem('map_user_name');
+            window.location.reload();
+        }
+    }
+
     function handleLockPress(e) {
         if (e.key === 'Enter') attemptLogin();
     }
@@ -454,7 +461,7 @@
         return {
             id: Date.now() + Math.floor(Math.random() * 1000),
             nome: nameMatch ? nameMatch[1] : "Novo Registro",
-            usuario: userToken, // ID do dono do registro
+            usuario: userToken,
             idade: ageMatch ? ageMatch[1] : "",
             status: 'conheci',
             favorito: false,
@@ -663,7 +670,6 @@
     async function load() {
         if (!userToken) return;
         
-        // Tenta carregar local primeiro para ser instantâneo
         const local = localStorage.getItem(`mapMatches_${userToken}`);
         if(local) {
             window.matches = JSON.parse(local);
@@ -794,6 +800,7 @@
 
     window.onload = () => {
         if (userToken) {
+            document.getElementById('display-user-name').textContent = userName;
             document.getElementById('lock-screen').classList.add('unlocked');
             load();
         }
