@@ -173,18 +173,24 @@
 <body class="no-scrollbar">
 
     <!-- Mascara / Lock Screen -->
-    <div id="lock-screen">
-        <div class="text-center space-y-8">
-            <div class="space-y-2">
-                <span class="text-4xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
-                <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] italic">Dossiê System</p>
-            </div>
-            <div class="space-y-4">
-                <input type="password" id="pass-trigger" placeholder="Type command..." class="lock-input italic uppercase" onkeypress="handleLockPress(event)">
-                <button onclick="checkLock()" class="block mx-auto text-[9px] font-black text-zinc-600 uppercase tracking-widest hover:text-rose-500 transition-colors italic">Acessar Ranking</button>
-            </div>
+<div id="lock-screen">
+    <div class="text-center space-y-8">
+        <div class="space-y-2">
+            <span class="text-4xl font-black tracking-tighter italic">MAP<span class="text-rose-500">.</span></span>
+            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] italic">Dossiê System</p>
+        </div>
+        
+        <div class="flex flex-col gap-3">
+            <input type="text" id="login-user" placeholder="USUÁRIO" class="lock-input italic uppercase">
+            <input type="password" id="login-pass" placeholder="SENHA" class="lock-input italic uppercase">
+            
+            <button onclick="attemptLogin()" id="btn-login" class="w-full bg-rose-500 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all italic mt-4">
+                Acessar Ambiente
+            </button>
+            <p id="error-msg" class="text-rose-500 text-[10px] font-bold uppercase hidden">Credenciais Inválidas</p>
         </div>
     </div>
+</div>
 
     <div id="real-app" class="min-h-screen pb-40">
         <header class="p-6 flex justify-between items-center max-w-lg mx-auto">
@@ -384,356 +390,414 @@
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCOuuMGlaTJIl4he-H0gALsRNn40IjM4pmWfNR8vcmCTGf3LYfo40Pt-4dLMz0m4YZ/exec"; 
-        
-        window.matches = [];
-        let activeTab = 'home';
-        let currentEditingId = null;
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCOuuMGlaTJIl4he-H0gALsRNn40IjM4pmWfNR8vcmCTGf3LYfo40Pt-4dLMz0m4YZ/exec"; 
+    
+    window.matches = [];
+    let activeTab = 'home';
+    let currentEditingId = null;
+    let userToken = localStorage.getItem('map_token') || null;
 
-        // --- Sistema de Bloqueio ---
-        function handleLockPress(e) {
-            if (e.key === 'Enter') checkLock();
-        }
+    // --- Sistema de Autenticação Real ---
+    async function attemptLogin() {
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        const btn = document.getElementById('btn-login');
+        const errorMsg = document.getElementById('error-msg');
 
-        function checkLock() {
-            const input = document.getElementById('pass-trigger');
-            if (input.value.toLowerCase() === 'open ranking') {
-                document.getElementById('lock-screen').classList.add('unlocked');
-                input.value = "";
-            } else {
-                input.style.borderColor = "#ef4444";
-                setTimeout(() => input.style.borderColor = "rgba(255, 255, 255, 0.1)", 1000);
-            }
-        }
+        if (!user || !pass) return;
 
-        function safeSetText(id, text) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        }
+        btn.innerText = "AUTENTICANDO...";
+        btn.disabled = true;
+        errorMsg.classList.add('hidden');
 
-        // --- Extracção de dados ---
-        function extractFromText(content) {
-            const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
-            const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
-            const nameMatch = content.match(/(?:\]\s*)([A-Z][a-zà-ú]+)(?:\s*:)/);
-
-            return {
-                id: Date.now() + Math.floor(Math.random() * 1000),
-                nome: nameMatch ? nameMatch[1] : "Novo Registro",
-                idade: ageMatch ? ageMatch[1] : "",
-                status: 'conheci',
-                favorito: false,
-                data: new Date().toLocaleDateString('pt-PT'),
-                instagram: instaMatch ? instaMatch[1] : "",
-                profissao: "",
-                formacao: "",
-                bairro: "",
-                cidade: "",
-                vibe_summary: "",
-                filhos: 0,
-                bebe: false,
-                fuma: false,
-                pets: false,
-                memoria_estrategica: "Importado via robô.",
-                foto: null
-            };
-        }
-
-        function processTextImport() {
-            const inputEl = document.getElementById('wa-text-input');
-            if (!inputEl || !inputEl.value) return;
-            const newMatch = extractFromText(inputEl.value);
-            window.matches.unshift(newMatch);
-            inputEl.value = "";
-            save();
-            openModal(newMatch.id);
-        }
-
-        async function handleMultiFileUpload(input) {
-            if (!input.files || input.files.length === 0) return;
-            const status = document.getElementById('cloud-status');
-            if (status) status.classList.add('bg-blue-500', 'animate-pulse');
-
-            for (let i = 0; i < input.files.length; i++) {
-                const text = await input.files[i].text();
-                window.matches.unshift(extractFromText(text));
-            }
-
-            input.value = ""; 
-            await save();
-            render();
-        }
-
-        function createNewMatch() {
-            const id = Date.now();
-            window.matches.unshift({
-                id: id, nome: "Novo Registro", idade: "", status: 'conheci', favorito: false,
-                data: new Date().toLocaleDateString('pt-PT'), instagram: "", profissao: "",
-                formacao: "", bairro: "", cidade: "", vibe_summary: "", filhos: 0, bebe: false, fuma: false,
-                pets: false, memoria_estrategica: "", foto: null
+        try {
+            const resp = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "login", user: user, pass: pass })
             });
-            save(); openModal(id);
-        }
+            const result = await resp.json();
 
-        function switchTab(t) { 
-            activeTab = t; 
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            const targetTab = document.getElementById(`tab-${t}`);
-            if (targetTab) targetTab.classList.add('active');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
-            const targetNav = document.getElementById(`nav-${t}`);
-            if (targetNav) targetNav.classList.add('nav-active');
-            
-            render();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function openModal(id) {
-            currentEditingId = id;
-            const m = window.matches.find(x => x.id === id);
-            if (!m) return;
-            
-            const fields = {
-                'edit-name': m.nome,
-                'edit-age': m.idade,
-                'edit-profession': m.profissao,
-                'edit-formation': m.formacao,
-                'edit-neighborhood': m.bairro,
-                'edit-city': m.cidade,
-                'edit-instagram': m.instagram,
-                'edit-vibe': m.vibe_summary,
-                'edit-topics': m.memoria_estrategica
-            };
-
-            for (let id in fields) {
-                const el = document.getElementById(id);
-                if (el) el.value = fields[id] || "";
+            if (result.success) {
+                userToken = result.userToken;
+                localStorage.setItem('map_token', userToken);
+                document.getElementById('lock-screen').classList.add('unlocked');
+                load(); 
+            } else {
+                errorMsg.classList.remove('hidden');
+                btn.innerText = "ACESSAR AMBIENTE";
+                btn.disabled = false;
             }
+        } catch (e) {
+            console.error("Erro no login:", e);
+            btn.innerText = "ERRO DE CONEXÃO";
+            btn.disabled = false;
+        }
+    }
 
-            const updateBadgeUI = (badgeId, active, label = null) => {
-                const el = document.getElementById(`badge-${badgeId}`);
-                if (el) {
-                    if (active) el.classList.add('active'); else el.classList.remove('active');
-                    if(label) {
-                        const labelEl = document.getElementById(`label-${badgeId}`);
-                        if(labelEl) labelEl.textContent = label;
-                    }
-                }
-            };
+    // Adaptador para manter a função checkLock original se preferir usar o comando "open ranking"
+    function handleLockPress(e) {
+        if (e.key === 'Enter') attemptLogin();
+    }
 
-            updateBadgeUI('bebe', m.bebe);
-            updateBadgeUI('fuma', m.fuma);
-            updateBadgeUI('pets', m.pets);
-            updateBadgeUI('filhos', m.filhos > 0, m.filhos > 0 ? `Kids (${m.filhos})` : 'Kids');
+    function safeSetText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
 
-            const photoImg = document.getElementById('modal-photo-img');
-            const initialSpan = document.getElementById('modal-initial');
-            if (photoImg && initialSpan) {
-                if (m.foto) {
-                    photoImg.src = m.foto; photoImg.classList.remove('hidden'); initialSpan.classList.add('hidden');
-                } else { 
-                    photoImg.classList.add('hidden'); 
-                    initialSpan.classList.remove('hidden'); 
-                    initialSpan.textContent = (m.nome || "?")[0]; 
-                }
-            }
+    // --- Extração de dados ---
+    function extractFromText(content) {
+        const instaMatch = content.match(/@([a-zA-Z0-9._]+)/);
+        const ageMatch = content.match(/(\d{2})\s*(?:anos|yo|idade)/i);
+        const nameMatch = content.match(/(?:\]\s*)([A-Z][a-zà-ú]+)(?:\s*:)/);
 
-            // Atribuir função de deletar ao botão do modal
-            document.getElementById('modal-delete-btn').onclick = () => deleteMatch(m.id);
+        return {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            nome: nameMatch ? nameMatch[1] : "Novo Registro",
+            usuario: userToken, // ID do dono do registro
+            idade: ageMatch ? ageMatch[1] : "",
+            status: 'conheci',
+            favorito: false,
+            data: new Date().toLocaleDateString('pt-PT'),
+            instagram: instaMatch ? instaMatch[1] : "",
+            profissao: "",
+            formacao: "",
+            bairro: "",
+            cidade: "",
+            vibe_summary: "",
+            filhos: 0,
+            bebe: false,
+            fuma: false,
+            pets: false,
+            memoria_estrategica: "Importado via robô.",
+            foto: null
+        };
+    }
 
-            document.getElementById('match-modal').classList.remove('hidden');
-            lucide.createIcons();
+    async function processTextImport() {
+        const inputEl = document.getElementById('wa-text-input');
+        if (!inputEl || !inputEl.value) return;
+        const newMatch = extractFromText(inputEl.value);
+        window.matches.unshift(newMatch);
+        inputEl.value = "";
+        await save();
+        openModal(newMatch.id);
+    }
+
+    async function handleMultiFileUpload(input) {
+        if (!input.files || input.files.length === 0) return;
+        const status = document.getElementById('cloud-status');
+        if (status) status.classList.add('bg-blue-500', 'animate-pulse');
+
+        for (let i = 0; i < input.files.length; i++) {
+            const text = await input.files[i].text();
+            window.matches.unshift(extractFromText(text));
         }
 
-        // Função para deletar um único match
-        function deleteMatch(id) {
-            if (confirm("Tens a certeza que queres eliminar permanentemente este registo?")) {
-                window.matches = window.matches.filter(m => m.id !== id);
-                closeModal();
-                save();
-                render();
-            }
-        }
+        input.value = ""; 
+        await save();
+        render();
+    }
 
-        function toggleBadge(key) {
-            const m = window.matches.find(x => x.id === currentEditingId);
-            if (!m) return;
-            m[key] = !m[key];
-            openModal(currentEditingId);
-            save();
-        }
+    function createNewMatch() {
+        const id = Date.now();
+        window.matches.unshift({
+            id: id, nome: "Novo Registro", usuario: userToken, idade: "", status: 'conheci', favorito: false,
+            data: new Date().toLocaleDateString('pt-PT'), instagram: "", profissao: "",
+            formacao: "", bairro: "", cidade: "", vibe_summary: "", filhos: 0, bebe: false, fuma: false,
+            pets: false, memoria_estrategica: "", foto: null
+        });
+        save(); openModal(id);
+    }
 
-        function askKidsCount() {
-            const count = prompt("Quantos filhos?", "1");
-            if(count !== null) {
-                const m = window.matches.find(x => x.id === currentEditingId);
-                if (m) {
-                    m.filhos = parseInt(count) || 0;
-                    openModal(currentEditingId);
-                    save();
-                }
-            }
-        }
-
-        function updateModalState() {
-            const m = window.matches.find(x => x.id === currentEditingId);
-            if (!m) return;
-            const getVal = (id) => document.getElementById(id)?.value || "";
-            m.nome = getVal('edit-name');
-            m.idade = getVal('edit-age');
-            m.profissao = getVal('edit-profession');
-            m.formacao = getVal('edit-formation');
-            m.bairro = getVal('edit-neighborhood');
-            m.cidade = getVal('edit-city');
-            m.instagram = getVal('edit-instagram');
-            m.vibe_summary = getVal('edit-vibe');
-            m.memoria_estrategica = getVal('edit-topics');
-        }
-
-        function saveAndCloseModal() {
-            updateModalState(); save(); closeModal();
-        }
-
-        function closeModal() { 
-            document.getElementById('match-modal').classList.add('hidden'); 
-            render(); 
-        }
+    function switchTab(t) { 
+        activeTab = t; 
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        const targetTab = document.getElementById(`tab-${t}`);
+        if (targetTab) targetTab.classList.add('active');
         
-        async function save() { 
-            localStorage.setItem('mapMatches_vFinal_v6', JSON.stringify(window.matches));
-            const status = document.getElementById('cloud-status');
-            if (status) status.classList.add('bg-blue-500', 'animate-pulse');
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
+        const targetNav = document.getElementById(`nav-${t}`);
+        if (targetNav) targetNav.classList.add('nav-active');
+        
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(window.matches) });
-                if (status) {
-                    status.classList.remove('animate-pulse');
-                    status.classList.replace('bg-blue-500', 'bg-green-500');
-                    setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
+    function openModal(id) {
+        currentEditingId = id;
+        const m = window.matches.find(x => x.id == id);
+        if (!m) return;
+        
+        const fields = {
+            'edit-name': m.nome,
+            'edit-age': m.idade,
+            'edit-profession': m.profissao,
+            'edit-formation': m.formacao,
+            'edit-neighborhood': m.bairro,
+            'edit-city': m.cidade,
+            'edit-instagram': m.instagram,
+            'edit-vibe': m.vibe_summary,
+            'edit-topics': m.memoria_estrategica
+        };
+
+        for (let id in fields) {
+            const el = document.getElementById(id);
+            if (el) el.value = fields[id] || "";
+        }
+
+        const updateBadgeUI = (badgeId, active, label = null) => {
+            const el = document.getElementById(`badge-${badgeId}`);
+            if (el) {
+                if (active) el.classList.add('active'); else el.classList.remove('active');
+                if(label) {
+                    const labelEl = document.getElementById(`label-${badgeId}`);
+                    if(labelEl) labelEl.textContent = label;
                 }
-            } catch(e) { 
-                if (status) {
-                    status.classList.remove('animate-pulse');
-                    status.classList.replace('bg-blue-500', 'bg-red-500'); 
-                }
+            }
+        };
+
+        updateBadgeUI('bebe', m.bebe);
+        updateBadgeUI('fuma', m.fuma);
+        updateBadgeUI('pets', m.pets);
+        updateBadgeUI('filhos', m.filhos > 0, m.filhos > 0 ? `Kids (${m.filhos})` : 'Kids');
+
+        const photoImg = document.getElementById('modal-photo-img');
+        const initialSpan = document.getElementById('modal-initial');
+        if (photoImg && initialSpan) {
+            if (m.foto) {
+                photoImg.src = m.foto; photoImg.classList.remove('hidden'); initialSpan.classList.add('hidden');
+            } else { 
+                photoImg.classList.add('hidden'); 
+                initialSpan.classList.remove('hidden'); 
+                initialSpan.textContent = (m.nome || "?")[0]; 
             }
         }
 
-        async function load() {
-            const local = localStorage.getItem('mapMatches_vFinal_v6');
-            if(local) window.matches = JSON.parse(local);
-            
-            const status = document.getElementById('cloud-status');
-            if (status) status.classList.add('animate-pulse');
-            try {
-                const resp = await fetch(SCRIPT_URL);
-                const data = await resp.json();
-                if(data && data.length > 0) window.matches = data;
-                if (status) status.classList.replace('bg-zinc-700', 'bg-green-500');
-            } catch(e) { 
-                if (status) status.classList.replace('bg-zinc-700', 'bg-red-500'); 
+        document.getElementById('modal-delete-btn').onclick = () => deleteMatch(m.id);
+        document.getElementById('match-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function deleteMatch(id) {
+        if (confirm("Tens a certeza que queres eliminar permanentemente este registo?")) {
+            window.matches = window.matches.filter(m => m.id != id);
+            closeModal();
+            save();
+            render();
+        }
+    }
+
+    function toggleBadge(key) {
+        const m = window.matches.find(x => x.id == currentEditingId);
+        if (!m) return;
+        m[key] = !m[key];
+        openModal(currentEditingId);
+        save();
+    }
+
+    function askKidsCount() {
+        const count = prompt("Quantos filhos?", "1");
+        if(count !== null) {
+            const m = window.matches.find(x => x.id == currentEditingId);
+            if (m) {
+                m.filhos = parseInt(count) || 0;
+                openModal(currentEditingId);
+                save();
             }
+        }
+    }
+
+    function updateModalState() {
+        const m = window.matches.find(x => x.id == currentEditingId);
+        if (!m) return;
+        const getVal = (id) => document.getElementById(id)?.value || "";
+        m.nome = getVal('edit-name');
+        m.idade = getVal('edit-age');
+        m.profissao = getVal('edit-profession');
+        m.formacao = getVal('edit-formation');
+        m.bairro = getVal('edit-neighborhood');
+        m.cidade = getVal('edit-city');
+        m.instagram = getVal('edit-instagram');
+        m.vibe_summary = getVal('edit-vibe');
+        m.memoria_estrategica = getVal('edit-topics');
+    }
+
+    function saveAndCloseModal() {
+        updateModalState(); save(); closeModal();
+    }
+
+    function closeModal() { 
+        document.getElementById('match-modal').classList.add('hidden'); 
+        render(); 
+    }
+    
+    async function save() { 
+        if (!userToken) return;
+        localStorage.setItem(`mapMatches_${userToken}`, JSON.stringify(window.matches));
+        const status = document.getElementById('cloud-status');
+        if (status) status.classList.add('bg-blue-500', 'animate-pulse');
+
+        try {
+            await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({
+                    action: "save",
+                    userToken: userToken,
+                    matches: window.matches
+                }) 
+            });
             if (status) {
                 status.classList.remove('animate-pulse');
+                status.classList.replace('bg-blue-500', 'bg-green-500');
                 setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
             }
+        } catch(e) { 
+            if (status) {
+                status.classList.remove('animate-pulse');
+                status.classList.replace('bg-blue-500', 'bg-red-500'); 
+            }
+        }
+    }
+
+    async function load() {
+        if (!userToken) return;
+        
+        // Tenta carregar local primeiro para ser instantâneo
+        const local = localStorage.getItem(`mapMatches_${userToken}`);
+        if(local) {
+            window.matches = JSON.parse(local);
             render();
         }
-
-        function render() {
-            const stats = { conheci: 0, sai: 0, fiquei: 0, transei: 0 };
-            window.matches.forEach(m => stats[m.status]++);
-            safeSetText('global-score', (window.matches.length * 5 + stats.transei * 85).toFixed(2));
-
-            let containerId = activeTab === 'home' ? 'recent-list' : activeTab === 'search' ? 'search-results' : activeTab === 'bookmarks' ? 'bookmarks-list' : null;
-            const container = containerId ? document.getElementById(containerId) : null;
-            if (container) {
-                const searchEl = document.getElementById('search-input');
-                let f = activeTab === 'search' && searchEl ? window.matches.filter(x => x.nome.toLowerCase().includes(searchEl.value.toLowerCase())) :
-                        activeTab === 'bookmarks' ? window.matches.filter(x => x.favorito) : window.matches;
-                container.innerHTML = f.map(m => `
-                    <div class="glass-card p-5 flex items-center justify-between border-l-4 status-${m.status}" onclick="openModal(${m.id})">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center font-black italic border border-white/5 overflow-hidden uppercase">
-                                ${m.foto ? `<img src="${m.foto}" class="w-full h-full object-cover">` : (m.nome || "?")[0]}
-                            </div>
-                            <div>
-                                <h3 class="font-black italic text-sm tracking-tighter">${m.nome}</h3>
-                                <p class="text-[8px] text-zinc-600 font-black uppercase tracking-widest italic">${m.data}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
-                             <button onclick="toggleFavorite(${m.id})" class="p-2 ${m.favorito ? 'text-rose-500' : 'text-zinc-700'}"><i data-lucide="bookmark" class="w-5 h-5 ${m.favorito ? 'fill-current' : ''}"></i></button>
-                             
-                             <!-- Botão de apagar individual na lista -->
-                             <button onclick="deleteMatch(${m.id})" class="p-2 text-zinc-700 hover:text-red-500 transition-colors">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                             </button>
-
-                             <select onchange="updateStatus(${m.id}, this.value)" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase border border-white/5 text-zinc-400 outline-none italic">
-                                <option value="conheci" ${m.status === 'conheci' ? 'selected' : ''}>Conheci</option>
-                                <option value="sai" ${m.status === 'sai' ? 'selected' : ''}>Saí</option>
-                                <option value="fiquei" ${m.status === 'fiquei' ? 'selected' : ''}>Fiquei</option>
-                                <option value="transei" ${m.status === 'transei' ? 'selected' : ''}>Transei</option>
-                             </select>
-                        </div>
-                    </div>`).join('');
-            }
-
-            if(activeTab === 'stats') {
-                const total = window.matches.length;
-                const funnelContainer = document.getElementById('conversion-funnel');
-                if (funnelContainer) {
-                    const steps = [{ label: 'Conheci', val: total, color: '#3b82f6' }, { label: 'Saíram', val: stats.sai + stats.fiquei + stats.transei, color: '#a855f7' }, { label: 'Fiquei', val: stats.fiquei + stats.transei, color: '#ec4899' }, { label: 'Transei', val: stats.transei, color: '#ef4444' }];
-                    funnelContainer.innerHTML = `<h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic mb-2">Funil de Conversão</h3>` + steps.map(s => {
-                        const width = total > 0 ? Math.max((s.val / total) * 100, 15) : 0;
-                        return `<div class="w-full flex flex-col gap-1 items-center"><div class="funnel-step rounded-xl" style="width: ${width}%; background-color: ${s.color}20; border: 1px solid ${s.color}40"><span style="color: ${s.color}">${s.val}</span></div><span class="text-[7px] font-black text-zinc-600 uppercase tracking-tighter italic">${s.label}</span></div>`;
-                    }).join('');
-                }
-                const b = document.getElementById('status-bars');
-                if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `<div class="space-y-1"><div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div><div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${k==='conheci'?'#3b82f6':k==='sai'?'#a855f7':k==='fiquei'?'#ec4899':'#ef4444'}"></div></div></div>`).join('');
-                
-                const alphabetGrid = document.getElementById('full-alphabet-grid');
-                if (alphabetGrid) {
-                    const counts = {};
-                    window.matches.forEach(m => { if(m.nome) { const initial = m.nome[0].toUpperCase(); counts[initial] = (counts[initial] || 0) + 1; } });
-                    alphabetGrid.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => {
-                        const count = counts[l] || 0;
-                        return `<div class="p-3 rounded-2xl border ${count ? 'bg-zinc-800 border-rose-500/20 text-white' : 'bg-zinc-900/40 border-white/5 text-zinc-800'} flex flex-col items-center">
-                            <span class="text-[11px] font-black italic">${l}</span>
-                            <span class="text-[8px] font-bold mt-0.5">${count}</span>
-                        </div>`;
-                    }).join('');
-                }
-            }
-            lucide.createIcons();
-        }
-
-        function toggleFavorite(id) { window.matches = window.matches.map(m => m.id === id ? { ...m, favorito: !m.favorito } : m); save(); render(); }
-        function updateStatus(id, s) { window.matches = window.matches.map(m => m.id === id ? { ...m, status: s } : m); save(); render(); }
         
-        // Função para apagar tudo (já estava no código, apenas reforcei o aviso)
-        function confirmReset() { 
-            if(confirm("ATENÇÃO: Desejas apagar TODOS os registos? Esta ação limpará a planilha e o armazenamento local permanentemente.")) { 
-                window.matches = []; 
-                save(); 
-                render(); 
-            } 
+        const status = document.getElementById('cloud-status');
+        if (status) status.classList.add('animate-pulse');
+
+        try {
+            const resp = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "load", userToken: userToken })
+            });
+            const data = await resp.json();
+            if(data && Array.isArray(data)) {
+                window.matches = data;
+                localStorage.setItem(`mapMatches_${userToken}`, JSON.stringify(data));
+            }
+            if (status) status.classList.replace('bg-zinc-700', 'bg-green-500');
+        } catch(e) { 
+            if (status) status.classList.replace('bg-zinc-700', 'bg-red-500'); 
+        }
+        
+        if (status) {
+            status.classList.remove('animate-pulse');
+            setTimeout(() => status.classList.replace('bg-green-500', 'bg-zinc-700'), 2000);
+        }
+        render();
+    }
+
+    function render() {
+        const stats = { conheci: 0, sai: 0, fiquei: 0, transei: 0 };
+        window.matches.forEach(m => {
+            if (stats[m.status] !== undefined) stats[m.status]++;
+        });
+        
+        safeSetText('global-score', (window.matches.length * 5 + (stats.transei || 0) * 85).toFixed(2));
+
+        let containerId = activeTab === 'home' ? 'recent-list' : activeTab === 'search' ? 'search-results' : activeTab === 'bookmarks' ? 'bookmarks-list' : null;
+        const container = containerId ? document.getElementById(containerId) : null;
+        
+        if (container) {
+            const searchEl = document.getElementById('search-input');
+            let f = activeTab === 'search' && searchEl ? window.matches.filter(x => x.nome.toLowerCase().includes(searchEl.value.toLowerCase())) :
+                    activeTab === 'bookmarks' ? window.matches.filter(x => x.favorito) : window.matches;
+            
+            container.innerHTML = f.map(m => `
+                <div class="glass-card p-5 flex items-center justify-between border-l-4 status-${m.status}" onclick="openModal(${m.id})">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center font-black italic border border-white/5 overflow-hidden uppercase">
+                            ${m.foto ? `<img src="${m.foto}" class="w-full h-full object-cover">` : (m.nome || "?")[0]}
+                        </div>
+                        <div>
+                            <h3 class="font-black italic text-sm tracking-tighter">${m.nome}</h3>
+                            <p class="text-[8px] text-zinc-600 font-black uppercase tracking-widest italic">${m.data}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                         <button onclick="toggleFavorite(${m.id})" class="p-2 ${m.favorito ? 'text-rose-500' : 'text-zinc-700'}"><i data-lucide="bookmark" class="w-5 h-5 ${m.favorito ? 'fill-current' : ''}"></i></button>
+                         <button onclick="deleteMatch(${m.id})" class="p-2 text-zinc-700 hover:text-red-500 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                         </button>
+                         <select onchange="updateStatus(${m.id}, this.value)" class="text-[8px] bg-zinc-900 rounded-xl px-2 py-2 font-black uppercase border border-white/5 text-zinc-400 outline-none italic">
+                            <option value="conheci" ${m.status === 'conheci' ? 'selected' : ''}>Conheci</option>
+                            <option value="sai" ${m.status === 'sai' ? 'selected' : ''}>Saí</option>
+                            <option value="fiquei" ${m.status === 'fiquei' ? 'selected' : ''}>Fiquei</option>
+                            <option value="transei" ${m.status === 'transei' ? 'selected' : ''}>Transei</option>
+                         </select>
+                    </div>
+                </div>`).join('');
         }
 
-        document.getElementById('match-photo-input').addEventListener('change', (e) => {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                window.matches = window.matches.map(m => m.id === currentEditingId ? { ...m, foto: ev.target.result } : m);
-                save(); openModal(currentEditingId);
-            };
-            reader.readAsDataURL(file);
-        });
+        if(activeTab === 'stats') {
+            const total = window.matches.length;
+            const funnelContainer = document.getElementById('conversion-funnel');
+            if (funnelContainer) {
+                const steps = [
+                    { label: 'Conheci', val: total, color: '#3b82f6' }, 
+                    { label: 'Saíram', val: stats.sai + stats.fiquei + stats.transei, color: '#a855f7' }, 
+                    { label: 'Fiquei', val: stats.fiquei + stats.transei, color: '#ec4899' }, 
+                    { label: 'Transei', val: stats.transei, color: '#ef4444' }
+                ];
+                funnelContainer.innerHTML = `<h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic mb-2">Funil de Conversão</h3>` + steps.map(s => {
+                    const width = total > 0 ? Math.max((s.val / total) * 100, 15) : 0;
+                    return `<div class="w-full flex flex-col gap-1 items-center"><div class="funnel-step rounded-xl" style="width: ${width}%; background-color: ${s.color}20; border: 1px solid ${s.color}40"><span style="color: ${s.color}">${s.val}</span></div><span class="text-[7px] font-black text-zinc-600 uppercase tracking-tighter italic">${s.label}</span></div>`;
+                }).join('');
+            }
+            const b = document.getElementById('status-bars');
+            if(b) b.innerHTML = `<div class="flex items-center gap-2 mb-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i><h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Distribuição Geral</h3></div>` + Object.entries(stats).map(([k, v]) => `<div class="space-y-1"><div class="flex justify-between text-[8px] font-black uppercase text-zinc-500"><span>${k}</span><span>${v}</span></div><div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden"><div class="h-full" style="width:${total ? (v/total*100) : 0}%; background-color:${k==='conheci'?'#3b82f6':k==='sai'?'#a855f7':k==='fiquei'?'#ec4899':'#ef4444'}"></div></div></div>`).join('');
+            
+            const alphabetGrid = document.getElementById('full-alphabet-grid');
+            if (alphabetGrid) {
+                const counts = {};
+                window.matches.forEach(m => { if(m.nome) { const initial = m.nome[0].toUpperCase(); counts[initial] = (counts[initial] || 0) + 1; } });
+                alphabetGrid.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => {
+                    const count = counts[l] || 0;
+                    return `<div class="p-3 rounded-2xl border ${count ? 'bg-zinc-800 border-rose-500/20 text-white' : 'bg-zinc-900/40 border-white/5 text-zinc-800'} flex flex-col items-center">
+                        <span class="text-[11px] font-black italic">${l}</span>
+                        <span class="text-[8px] font-bold mt-0.5">${count}</span>
+                    </div>`;
+                }).join('');
+            }
+        }
+        lucide.createIcons();
+    }
 
-        window.onload = load;
-    </script>
+    function toggleFavorite(id) { window.matches = window.matches.map(m => m.id == id ? { ...m, favorito: !m.favorito } : m); save(); render(); }
+    function updateStatus(id, s) { window.matches = window.matches.map(m => m.id == id ? { ...m, status: s } : m); save(); render(); }
+    
+    function confirmReset() { 
+        if(confirm("ATENÇÃO: Desejas apagar TODOS os teus registos?")) { 
+            window.matches = []; 
+            save(); 
+            render(); 
+        } 
+    }
+
+    document.getElementById('match-photo-input').addEventListener('change', (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            window.matches = window.matches.map(m => m.id == currentEditingId ? { ...m, foto: ev.target.result } : m);
+            save(); openModal(currentEditingId);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    window.onload = () => {
+        if (userToken) {
+            document.getElementById('lock-screen').classList.add('unlocked');
+            load();
+        }
+    };
+</script>
 </body>
 </html>
